@@ -1,7 +1,9 @@
 fbstats
 =======
 
-facebook messaging statistics
+facebook messaging statistics.
+(Anonymized) sample output:
+![sample](http://i.imgur.com/QuUJ3cc.png)
 
 Usage
 -----
