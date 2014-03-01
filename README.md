@@ -8,7 +8,7 @@ facebook messaging statistics.
 Usage
 -----
 As the API from facebook is still in beta, you will need to be facebook developer and create an "app" for this to work. The app needs to be allowed to get the "read_mailbox" permission.
-replace "appId:" with the app id you created and change the url to somewhere you can host.
+Go to this link: http://tehdog.github.io/fbstats/ and put in your app id. Voilà!
 
 Code
 ------
