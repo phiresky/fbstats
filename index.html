@@ -1,8 +1,10 @@
+<!doctype html>
 <!--
 facebook message statistics.
 uses the unified_thread api which is not available to the public since 2012: https://developers.facebook.com/docs/reference/api/thread/
 -->
-
+    <meta charset='utf-8'>
+    <title>Facebook Messaging Statistics</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/jquery-ui.custom.min.css" rel="stylesheet">
 	<style>
@@ -56,7 +58,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 			  </div>
 			  <button type="submit" class="btn btn-default">Begin</button>
 			</form>
-			<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="loader.gif"></a>
+			<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="loader.gif" alt="loading.."></a>
 		</div>
 		<div id="statistics">
 			<div class=plotcontainer><div id=threadcount>
@@ -152,7 +154,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 				//txt.text("Gathering statistics");
 				$("<a/>",{
 					class:"btn btn-lg btn-primary centered",
-					html:"<span id=threadload>Gathering statistics</span> <img src=loader.gif>",
+					html:"<span id=threadload>Gathering statistics</span> <img src=loader.gif alt=\"loading..\">",
 				}).appendTo("#threadcount");
 
 				$("<a/>",{
