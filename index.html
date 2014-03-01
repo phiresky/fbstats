@@ -48,6 +48,13 @@ uses the unified_thread api which is not available to the public since 2012: htt
 
 	<div class="container">
 		<div class="centered">
+			<form id=appidform class="form-horizontal" role="form">
+			  <div class="form-group">
+				<label for="appidinput">Your App ID</label>
+				<input type="text" class="form-control" id="appidinput" placeholder="App ID" value="348504898596898">
+			  </div>
+			  <button type="submit" class="btn btn-default">Begin</button>
+			</form>
 			<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="loader.gif"></a>
 		</div>
 		<div id="statistics">
@@ -163,33 +170,43 @@ uses the unified_thread api which is not available to the public since 2012: htt
 			var butt=$("#loginbutton");
 			var txt=$("#logintext");
 			var img=butt.children("img");
-			
-			txt.text("Logging in to Facebook");
-			FB.init({appId:'348504898596898',xfbml:false,cookie:true});
-			FB.getLoginStatus(function(response) {
-				switch(response.status) {
-				case "connected":
-					txt.text("Checking permissions");
-					FB.api("/me/permissions", function (e) {
-						if(!e.data[0].read_mailbox) {
-							txt.text("Could not access message data");
-							img.hide();
-						} else {
-							user=response.authResponse;
-							start();
-						}
-					});
-					break;
-				case "not_authorized":
-				case "unknown":
-					txt.text("Login to Facebook");
-					img.hide();
-					butt.click(login);
-					break;
-				}
+			butt.hide();
+			$(appidform).submit(function() {
+				event.preventDefault();
+				init($("#appidinput").val());
+				$(this).hide();
 			});
-			$("#threadcount").parent().resizable();
-			$("#threadtime").parent().resizable();
+			function init(appid) {	
+				butt.show();
+				txt.text("Logging in to Facebook");
+				FB.init({appId:appid,xfbml:false,cookie:true});
+				FB.getLoginStatus(function(response) {
+					console.log(arguments);
+					switch(response.status) {
+					case "connected":
+						txt.text("Checking permissions");
+						FB.api("/me/permissions", function (e) {
+							if(!e.data[0].read_mailbox) {
+								txt.text("Could not access message data");
+								img.hide();
+							} else {
+								user=response.authResponse;
+								start();
+							}
+						});
+						break;
+					case "not_authorized":
+					case "unknown":
+					default:
+						txt.text("Login to Facebook");
+						img.hide();
+						butt.click(login);
+						break;
+					}
+				});
+				$("#threadcount").parent().resizable();
+				$("#threadtime").parent().resizable();
+			}
 		});
 		FB.apireal=FB.api;
 		function log(e) {
