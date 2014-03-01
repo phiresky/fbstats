@@ -341,7 +341,9 @@ uses the unified_thread api which is not available to the public since 2012: htt
 							return;
 						}
 						for(var i=0;i<response.length;i++) {
-							thread.messages.push(parseInt(response[i].timestamp));
+							var stamp = parseInt(response[i].timestamp);
+							if(stamp>=1072915200000) // from before 2004 is probably invalid data
+								thread.messages.push(stamp);
 						}
 						$("#msgload").text("Downloading timestamp "+thread.messages.length+" / "+thread.count);
 						if(response.length==0) {
