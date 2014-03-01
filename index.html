@@ -456,8 +456,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 					lines:{
 						show:true,
 						lineWidth:0,
-							fillColor: { colors: [ { opacity: 1 },{opacity:0.99} ]},
-							//fillColor:"#ff0000",
+						fillColor: { colors: [ { opacity: (stacked?1:0.65) },{opacity:(stacked?0.99:0.64)} ]},
 						fill:true,
 							steps:steps
 					},
