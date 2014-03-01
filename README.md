@@ -9,7 +9,6 @@ Usage
 -----
 You can use the version hosted at http://tehdog.github.io/fbstats/
 As the API from facebook is still in beta, you will need to be facebook developer and create an "app" for this to work.
-Go to this link: http://tehdog.github.io/fbstats/ and put in your app id. Voilà!
 
 ### Detailed App creation instructions
 
