@@ -23,6 +23,15 @@ As the API from facebook is still in beta, you will need to be facebook develope
 
 Code
 ------
-The code is really ugly and probably hard to understand, if you have questions just ask.
+As I didn't plan this to be public, the code is really ugly and probably hard to understand, if you have questions just ask. But it's valid HTML5, yay!
 
 The already downloaded message timestamps (Statistics.threads) will be stored locally, so they are cached when the page is refreshed.
+
+### Todo
+I'm not implying I will actually do these, but well 
+* Restructure code. It's a mess, you can't even find the entry point.
+* Support time range selection and zooming [like this](http://www.pureexample.com/jquery-flot/zooming-chart.html)
+* Rewrite "Other" calculation
+* Support import of messages.html from facebook data download
+* Support downloading messages themselves for viewing excerpts and extended analysis
+* ...
