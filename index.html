@@ -72,6 +72,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 		<button onclick="Statistics.lastUpdate=0;Statistics.save();document.location.reload();">Clear local cache</button>
 		<button onclick="getAll()">get all threads</button>
 		<button onclick="pushOther()">combine in other (wait for getall, only press once)</button>
+		<button onclick="Statistics.exportToCSV()">export timestamps to CSV</button>
 	</div>
 	<!--[if lt IE 9 ]>
 	<script>
@@ -462,7 +463,15 @@ uses the unified_thread api which is not available to the public since 2012: htt
 					},
 					colors:plotcolors
 				});
-
+			},
+			exportToCSV: function() {
+				var s="";
+				for(var t=0;t<Statistics.threads.length;t++) {
+					var tt=Statistics.threads[t],n=threadName(t,tt);
+					for(var m=0;m<tt.messages.length;m++)
+						s+=[n,new Date(tt.messages[m]).toISOString()].join(";")+"\n"
+				};
+				window.open().document.body.innerText=s;
 			}
 		}
 		$(window).on("beforeunload",function() {
