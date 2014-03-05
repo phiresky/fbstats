@@ -3,91 +3,112 @@
 facebook message statistics.
 uses the unified_thread api which is not available to the public since 2012: https://developers.facebook.com/docs/reference/api/thread/
 -->
-    <meta charset='utf-8'>
-    <title>Facebook Messaging Statistics</title>
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/jquery-ui.custom.min.css" rel="stylesheet">
-	<style>
-		html,body,.container {
-			height:100%;
-		}
-		.centered {
-			position: absolute;
-			/*width: 300px;
-			height: 100px;*/
-			margin-top: -50px;
-			margin-left: -150px;
-			top: 50%;
-			left: 50%;
-			text-align:center;
-			z-index:5;
-		}	 
-		#statistics {
-			width:100%;
-			height:100%;
-		}
-		.plotcontainer {
-			width:50%;
-			height:100%;
-			position:relative;
-			display:inline-block;
-			vertical-ali
+<meta charset='utf-8'>
+<title>Facebook Messaging Statistics</title>
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/jquery-ui.custom.min.css" rel="stylesheet">
+<style>
+	html, body, .container {
+		height: 100%;
+	}
+	.centered {
+		position: absolute;
+		/*width: 300px;
+		 height: 100px;*/
+		margin-top: -50px;
+		margin-left: -150px;
+		top: 50%;
+		left: 50%;
+		text-align: center;
+		z-index: 5;
+	}
+	#statistics {
+		width: 100%;
+		height: 100%;
+	}
+	.plotcontainer {
+		width: 50%;
+		height: 100%;
+		position: relative;
+		display: inline-block;vertical-ali
 		}
 		#threadcount,#threadtime {
-			width:100%;
-			height:100%;
-			position:relative;
-			display:inline-block;
-			vertical-align:top;
-		}
-		.container {
-			max-width:100%;
-		}
-		input {
-			width:200px
-		}
-	</style>
+		width: 100%;
+		height: 100%;
+		position: relative;
+		display: inline-block;
+		vertical-align: top;
+	}
+	.container {
+		max-width: 100%;
+	}
+	input {
+		width: 200px
+	}
+</style>
 
-	<div class="container">
-		<div class="centered">
-			<form id=appidform class="form-horizontal" role="form">
+<div class="container">
+	<div class="centered">
+		<form id=appidform class="form-horizontal" role="form">
 			<a href="https://github.com/tehdog/fbstats/blob/gh-pages/README.md#usage"><h3>View Instructions</h3></a>
-			  <div class="form-group">
+			<a href="https://github.com/tehdog/fbstats/"><h4>Source Code</h4></a>
+			<div class="form-group">
 				<label for="appidinput">Your App ID</label>
 				<input type="text" class="form-control" id="appidinput" placeholder="App ID">
-			  </div>
-			  <button type="submit" class="btn btn-default">Begin</button>
-			</form>
-			<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="loader.gif" alt="loading.."></a>
-		</div>
-		<div id="statistics">
-			<div class=plotcontainer><div id=threadcount>
-			</div></div><div class=plotcontainer><div id=threadtime>
-			</div></div>
-		</div>
-		Smoothness: <span id=smth>0</span><input type=range min=0 max=20 value=1 onchange="smooth=smth.innerText=this.value;Statistics.graphMessages()"><br>
-		Stacked: <input type=checkbox checked onclick="stacked=this.checked;Statistics.graphMessages()"><br>
-		Steps: <input type=checkbox checked onclick="steps=this.checked;Statistics.graphMessages()"><br>
-		Anonymous: <input type=checkbox onclick="anonymous=this.checked;Statistics.graphThreads();Statistics.graphMessages()"><br>
-		<button onclick="Statistics.lastUpdate=0;Statistics.save();document.location.reload();">Clear local cache</button>
-		<button onclick="getAll()">get all threads</button>
-		<button onclick="pushOther()">combine in other (wait for getall, only press once)</button>
-		<button onclick="Statistics.exportToCSV()">export timestamps to CSV</button>
+			</div>
+			<button type="submit" class="btn btn-default">
+				Begin
+			</button>
+		</form>
+		<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="loader.gif" alt="loading.."></a>
 	</div>
-	<!--[if lt IE 9 ]>
-	<script>
-		document.getElementById("loginbutton").innerText="Click here to upgrade your browser";
-		document.getElementById("loginbutton").onclick=function(){document.location.href="http://browsehappy.com/";};
-		document.execCommand('Stop');
-	</script>
-	<![endif]--> 
-    <script src="js/jquery.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="//connect.facebook.net/en_US/all.js"></script>
-	<script src="js/jquery.flot.min.js"></script>
-	<script src="js/jquery.flot.categories.min.js"></script>
-	<script src="js/jquery.flot.time.min.js"></script>
-	<script src="js/jquery.flot.resize.min.js"></script>
-	<script src="js/jquery.flot.stack.min.js"></script>
-	<script src="js/jquery-ui.custom.min.js"></script>
-	<script src="js/fbstats.min.js"></script>
+	<div id="statistics">
+		<div class=plotcontainer>
+			<div id="threadcount"> </div>
+		</div>
+		<div class=plotcontainer>
+			<div id="threadtime"> </div>
+		</div>
+	</div>
+	Smoothness: <span id=smth>0</span>
+	<input type="range" min=0 max=20 value=1 onchange="smooth=smth.innerText=this.value;Statistics.graphMessages()">
+	<br>
+	Stacked:
+	<input type="checkbox" checked onclick="stacked=this.checked;Statistics.graphMessages()">
+	<br>
+	Steps:
+	<input type="checkbox" checked onclick="steps=this.checked;Statistics.graphMessages()">
+	<br>
+	Anonymous:
+	<input type="checkbox" onclick="anonymous=this.checked;Statistics.graphThreads();Statistics.graphMessages()">
+	<br>
+	<button onclick="Statistics.lastUpdate=0;Statistics.save();document.location.reload();">
+		Clear local cache
+	</button>
+	<button onclick="getAll()">
+		get all threads
+	</button>
+	<button onclick="pushOther()">
+		combine in other (wait for getall, only press once)
+	</button>
+	<button onclick="Statistics.exportToCSV()">
+		export timestamps to CSV
+	</button>
+</div>
+<!--[if lt IE 9 ]>
+<script>
+document.getElementById("loginbutton").innerText="Click here to upgrade your browser";
+document.getElementById("loginbutton").onclick=function(){document.location.href="http://browsehappy.com/";};
+document.execCommand('Stop');
+</script>
+<![endif]-->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="//connect.facebook.net/en_US/all.js"></script>
+<script src="js/jquery.flot.min.js"></script>
+<script src="js/jquery.flot.categories.min.js"></script>
+<script src="js/jquery.flot.time.min.js"></script>
+<script src="js/jquery.flot.resize.min.js"></script>
+<script src="js/jquery.flot.stack.min.js"></script>
+<script src="js/jquery-ui.custom.min.js"></script>
+<script src="js/fbstats.min.js"></script>
