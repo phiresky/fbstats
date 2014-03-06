@@ -23,16 +23,8 @@ function begin() {
 		log.innerText+=JSON.stringify(response, null, 3);
 		switch (response.status) {
 			case "connected":
-				print("/me/permissions");
-				FB.api("/me/permissions", function(e) {
-					log.innerText+=JSON.stringify(e, null, 3);
-					if (!e.data[0].read_mailbox) {
-						print("ERR:no permission");
-					} else {
-						user = response.authResponse;
-						start();
-					}
-				});
+				user=response.authResponse;
+				checkPerms();
 				break;
 			case "not_authorized":
 			case "unknown":
@@ -41,12 +33,25 @@ function begin() {
 				print("login()");
 				FB.login(function(response) {
 					log.innerText+=JSON.stringify(response,null,3);
-					begin();
+					if(response.authResponse) {
+						// assume logged in
+						user=response.authResponse;
+						checkPerms();
+					} else begin();
 				}, {
 					scope : 'read_mailbox'
 				});
 				break;
 		}
+	});
+}
+function checkPerms() {
+	print("/me/permissions");
+	FB.api("/me/permissions", function(e) {
+		log.innerText+=JSON.stringify(e, null, 3);
+		if (!e.data[0].read_mailbox) {
+			print("ERR:no permission");
+		} else start();
 	});
 }
 function start() {
