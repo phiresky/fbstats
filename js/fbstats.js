@@ -115,7 +115,12 @@ function getAllInvisible() {
 
 function login() {
 	FB.login(function(response) {
-		document.location.reload();
+		if(response.authResponse) {
+			user = response.authResponse;
+			checkPerms();
+		} else {
+			document.location.reload();
+		}
 	}, {
 		scope : 'read_mailbox'
 	});
@@ -162,15 +167,8 @@ function init(appid) {
 		switch (response.status) {
 			case "connected":
 				txt.text("Checking permissions");
-				FB.api("/me/permissions", function(e) {
-					if (!e.data[0].read_mailbox) {
-						txt.text("Could not access message data");
-						img.hide();
-					} else {
-						user = response.authResponse;
-						start();
-					}
-				});
+				user = response.authResponse;
+				checkPerms();
 				break;
 			case "not_authorized":
 			case "unknown":
@@ -183,6 +181,17 @@ function init(appid) {
 	});
 	$("#threadcount").parent().resizable();
 	$("#threadtime").parent().resizable();
+}
+
+function checkPerms() {
+	FB.api("/me/permissions", function(e) {
+		if (!e.data[0].read_mailbox) {
+			txt.text("Could not access message data");
+			img.hide();
+		} else {
+			start();
+		}
+	});
 }
 
 function log(e) {
