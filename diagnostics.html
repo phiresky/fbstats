@@ -1,0 +1,55 @@
+<!doctype html>
+<meta charset="utf-8">
+App-ID:<input id="inp">
+<button onclick="begin()">go</button>
+<pre id="log"></pre>
+<script src="http://connect.facebook.net/en_US/all.js"></script>
+<script>
+function print(a) {
+	log.innerText+=a+"\n";
+}
+function begin() {
+	appid=inp.value;
+	print("FB.init({appId:"+appid+"})");
+	FB.init({
+		appId : appid,
+		xfbml : false,
+		cookie : true
+	});
+
+	print("getLoginStatus()");
+	FB.getLoginStatus(function(response) {
+		print("getLoginStatus:response");
+		log.innerText+=JSON.stringify(response, null, 3);
+		switch (response.status) {
+			case "connected":
+				print("/me/permissions");
+				FB.api("/me/permissions", function(e) {
+					log.innerText+=JSON.stringify(e, null, 3);
+					if (!e.data[0].read_mailbox) {
+						print("ERR:no permission");
+					} else {
+						user = response.authResponse;
+						start();
+					}
+				});
+				break;
+			case "not_authorized":
+			case "unknown":
+			default:
+				print("not logged in");
+				print("login()");
+				FB.login(function(response) {
+					log.innerText+=JSON.stringify(response,null,3);
+					begin();
+				}, {
+					scope : 'read_mailbox'
+				});
+				break;
+		}
+	});
+}
+function start() {
+	print("Success. Can begin");
+}
+</script>
