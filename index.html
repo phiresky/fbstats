@@ -9,41 +9,36 @@ uses the unified_thread api which is not available to the public since 2012: htt
 <link href="css/jquery-ui.custom.min.css" rel="stylesheet">
 <style>
 	html, body, .container {
-		height: 100%;
+		height:100%;
 	}
 	.centered {
-		position: absolute;
-		/*width: 300px;
-		 height: 100px;*/
-		margin-top: -50px;
-		margin-left: -150px;
-		top: 50%;
-		left: 50%;
-		text-align: center;
-		z-index: 5;
+		position:absolute;
+		margin-top:-50px;
+		margin-left:-150px;
+		top:50%;
+		left:50%;
+		text-align:center;
+		z-index:5;
 	}
 	#statistics {
-		width: 100%;
-		height: 100%;
+		width:100%;
+		height:100%;
 	}
 	.plotcontainer {
-		width: 50%;
-		height: 100%;
-		position: relative;
-		display: inline-block;vertical-ali
+		width:49%;
+		height:100%;
+		position:relative;
+		display:inline-block;vertical-ali
 		}
 		#threadcount,#threadtime {
-		width: 100%;
-		height: 100%;
-		position: relative;
-		display: inline-block;
-		vertical-align: top;
+		width:100%;
+		height:100%;
+		position:relative;
+		display:inline-block;
+		vertical-align:top;
 	}
 	.container {
-		max-width: 100%;
-	}
-	input {
-		width: 200px
+		max-width:100%;
 	}
 </style>
 
@@ -64,14 +59,14 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	</div>
 	<div id="statistics">
 		<div class=plotcontainer>
-			<div id="threadcount"> </div>
+			<div id="threadcount"></div>
 		</div>
 		<div class=plotcontainer>
-			<div id="threadtime"> </div>
+			<div id="threadtime"></div>
 		</div>
 	</div>
-	Smoothness: <span id=smth>0</span>
-	<input type="range" min=0 max=20 value=1 onchange="smooth=smth.innerText=this.value;Statistics.graphMessages()">
+	Smoothness: <span id=smth>0</span></label>
+	<input id="smoothSlide" type="range" min=0 max=20 value=1 onchange="smooth=smth.innerText=this.value;Statistics.graphMessages()">
 	<br>
 	Stacked:
 	<input type="checkbox" checked onclick="stacked=this.checked;Statistics.graphMessages()">
@@ -82,17 +77,30 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	Anonymous:
 	<input type="checkbox" onclick="anonymous=this.checked;Statistics.graphThreads();Statistics.graphMessages()">
 	<br>
-	<button onclick="Statistics.lastUpdate=0;Statistics.save();document.location.reload();">
-		Clear local cache
+	Display other messages:
+	<input type="checkbox" checked onclick="other=this.checked;Statistics.graphThreads();Statistics.graphMessages()">
+	<br>
+	Scale: <select id="scaleselect"></select>
+	<br>
+	Grouping:
+	<select id="groupingselect">
+		<option>daily</option><option selected>weekly</option><option>monthly</option>
+	</select>
+	<br>
+	Thread display count:
+	<input id="threadcountinput" type=number min=5 max=30 value=15 step=1>
+	<br>
+	<button onclick="getAllVisible()">
+		get all visible threads
 	</button>
-	<button onclick="getAll()">
-		get all threads
-	</button>
-	<button onclick="pushOther()">
-		combine in other (wait for getall, only press once)
+	<button onclick="getAllInvisible()">
+		get all invisible threads
 	</button>
 	<button onclick="Statistics.exportToCSV()">
 		export timestamps to CSV
+	</button>
+	<button onclick="Statistics.lastUpdate=0;Statistics.save();document.location.reload();">
+		Clear local cache
 	</button>
 </div>
 <!--[if lt IE 9 ]>
