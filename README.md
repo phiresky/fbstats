@@ -18,7 +18,7 @@ As the API from facebook is still in beta, you will need to be facebook develope
 3. Settings -> Add Platform -> Website. Site URL: http://github.io/
 4. App Domains: tehdog.github.io
 5. It should look like this:  
-  ![scrernshert](http://i.imgur.com/LIQr23X.png)
+  ![scrernshert](http://i.imgur.com/UESItDP.png)
 6. Go to http://tehdog.github.io/fbstats/ and put in your app id. Voilà!
 
 Code
