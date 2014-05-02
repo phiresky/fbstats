@@ -7,7 +7,7 @@ facebook messaging statistics.
 
 Usage
 -----
-You can use the version hosted at http://tehdog.github.io/fbstats/
+You can use the version hosted at http://phiresky.github.io/fbstats/
 As the API from facebook is still in beta, you will need to be facebook developer and create an "app" for this to work.
 
 ### Detailed App creation instructions
@@ -16,10 +16,10 @@ As the API from facebook is still in beta, you will need to be facebook develope
 2. Create a new app  
   ![create app](http://i.imgur.com/KTHXIsE.png)
 3. Settings -> Add Platform -> Website. Site URL: http://github.io/
-4. App Domains: tehdog.github.io
+4. App Domains: phiresky.github.io
 5. It should look like this:  
   ![scrernshert](http://i.imgur.com/UESItDP.png)
-6. Go to http://tehdog.github.io/fbstats/ and put in your app id. Voilà!
+6. Go to http://phiresky.github.io/fbstats/ and put in your app id. Voilà!
 
 Code
 ------
