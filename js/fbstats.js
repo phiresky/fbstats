@@ -1,5 +1,5 @@
 /**
- * @author github.com/tehdog
+ * source: https://github.com/phiresky/fbstats
  * to be compiled with closure compiler
  */
 try {
