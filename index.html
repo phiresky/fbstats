@@ -40,10 +40,14 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	.container {
 		max-width:100%;
 	}
+	.errormessage {
+		position:fixed; top:20%; left:50%; margin-left:-150px; width:300px;z-index:999;
+	}
 </style>
 
 <div class="container">
 	<div class="centered">
+		<div class="alert alert-danger errormessage" style="display:none"><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
 		<form id=appidform class="form-horizontal" role="form">
 			<a href="https://github.com/tehdog/fbstats/blob/gh-pages/README.md#usage"><h3>View Instructions</h3></a>
 			<a href="https://github.com/tehdog/fbstats/"><h4>Source Code</h4></a>

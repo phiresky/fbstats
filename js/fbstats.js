@@ -2,7 +2,7 @@
  * @author github.com/tehdog
  * to be compiled with closure compiler
  */
-
+try {
 var user = {
 	userID : "unknown"
 };
@@ -129,7 +129,7 @@ function login() {
 function start() {
 	//txt.text("Gathering statistics");
 	$("<a/>", {
-		class : "btn btn-lg btn-primary centered",
+		"class" : "btn btn-lg btn-primary centered",
 		html : "<span id=threadload>Gathering statistics</span> <img src=loader.gif alt=\"loading..\">",
 	}).appendTo("#threadcount");
 
@@ -559,3 +559,4 @@ $(function() {
 	});
 });
 
+} catch(e) {$(".errormessage").append(e).fadeIn();throw e;}
