@@ -525,9 +525,13 @@ $(function() {
 	var img = butt.children("img");
 	butt.hide();
 	$("#appidform").submit(function() {
+		try {
 		event.preventDefault();
 		init($("#appidinput").val());
 		$(this).hide();
+		} catch(e) {
+			$(".errormessage").append(e).fadeIn();throw e;
+		}
 	});
 	var scaleselect = $("#scaleselect").change(function() {
 		scale = scales[$(this).val()];
@@ -560,3 +564,15 @@ $(function() {
 });
 
 } catch(e) {$(".errormessage").append(e).fadeIn();throw e;}
+
+if (typeof console  != "undefined") 
+    if (typeof console.log != 'undefined')
+        console.olog = console.log;
+    else
+        console.olog = function() {};
+
+console.log = function(message) {
+    console.olog(message);
+    $('#debugDiv').append('<p>' + message + '</p>');
+};
+console.error = console.debug = console.info =  console.log
