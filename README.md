@@ -10,6 +10,8 @@ Usage
 You can use the version hosted at http://phiresky.github.io/fbstats/
 As the API from facebook is still in beta, you will need to be facebook developer and create an "app" for this to work.
 
+**As of April 30. 2014 it seems like this will no longer work due to new restrictions in the facebook api. Apps created after that date will probably not work**
+
 ### Detailed App creation instructions
 
 1. Go to https://developers.facebook.com/ and become a developer
