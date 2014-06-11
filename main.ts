@@ -53,7 +53,7 @@ var scales: { [x: string]: Object } = {
     }
 }
 
-function threadName(t: number, thread: Thread, maxlength: number = 50): string {
+function threadName(t: number, thread: Thread, maxlength: number = 10000): string {
     if (t == -1)
         return "Other";
     if (Settings.anonymous)

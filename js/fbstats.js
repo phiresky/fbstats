@@ -66,7 +66,7 @@ var scales = {
 };
 
 function threadName(t, thread, maxlength) {
-    if (typeof maxlength === "undefined") { maxlength = 50; }
+    if (typeof maxlength === "undefined") { maxlength = 10000; }
     if (t == -1)
         return "Other";
     if (Settings.anonymous)
