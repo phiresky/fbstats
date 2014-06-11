@@ -186,8 +186,9 @@ function init(appid) {
 function checkPerms() {
 	FB.api("/me/permissions", function(e) {
 		if (!e.data[0].read_mailbox) {
-			txt.text("Could not access message data");
-			img.hide();
+			console.log(e.data);
+			$("#logintext").text("Could not access message data");
+			$("#loginbutton>img").hide();
 		} else {
 			start();
 		}
