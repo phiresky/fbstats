@@ -185,6 +185,14 @@ function init(appid) {
 
 function checkPerms() {
 	FB.api("/me/permissions", function(e) {
+		if(e.data[0].permission==="installed") {// fb api v2.0 
+			for(var i=0;i<e.data.length;i++) {
+				if(e.data[i].permission==="read_mailbox"&&e.data[i].status==="granted") {
+					start();
+					return;
+				}
+			}
+		}
 		if (!e.data[0].read_mailbox) {
 			console.log(e.data);
 			$("#logintext").text("Could not access message data");
