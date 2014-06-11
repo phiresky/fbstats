@@ -100,11 +100,17 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	Thread display count:
 	<input id="threadcountinput" type=number min=5 max=30 value=15 step=1>
 	<br>
+	<button onclick="getAll()">
+		Download/Display all threads
+	</button>
+	<button onclick="getAll(0,0)">
+		Show total only
+	</button>
 	<button onclick="getAllVisible()">
-		get all visible threads
+		Download/Display all visible threads
 	</button>
 	<button onclick="getAllInvisible()">
-		get all invisible threads
+		Download/Display all "Other" threads
 	</button>
 	<button onclick="Statistics.exportToCSV()">
 		export timestamps to CSV

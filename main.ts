@@ -1,3 +1,7 @@
+/**
+ * source: https://github.com/phiresky/fbstats
+ */
+
 var user = {
     userID: "unknown"
 };
@@ -22,6 +26,7 @@ var Settings = {
         smoothAmount: 0,
         separateInOut: true,
         stacked: true,
+        unstackedOpacity:0.8,
         steps: true,
         scale: "linear",
         grouping: TimeGrouping.weekly,
@@ -33,7 +38,7 @@ function getColor(tid: number, isIn: boolean) {
     var color: string;
     if (tid == -1) color = otherColor;
     else color = plotcolors[tid % plotcolors.length];
-    return toRGBA(hexToRGB(color, isIn ? 1.0 : 0.7));
+    return toRGBA(hexToRGB(color, isIn ? 1.0 : 0.8));
 }
 var otherColor = "#999999";
 var scales: { [x: string]: Object } = {
@@ -48,13 +53,6 @@ var scales: { [x: string]: Object } = {
     }
 }
 
-
-/**
- * @param {number} t thread id
- * @param {Thread} thread thread object
- * @param {number?} maxlength
- * @return {string}
- */
 function threadName(t: number, thread: Thread, maxlength: number = 50): string {
     if (t == -1)
         return "Other";
@@ -84,10 +82,8 @@ function toRGBA(hex: number[], a: number = 1) {
  * sets all threads as active and gets them
  * @param {number} max
  */
-function getAll(max?: number, min?: number) {
-    if (!min)
-        min = 0;
-    if (!max)
+function getAll(max: number = Statistics.threads.length, min: number = 0) {
+    if (max===null)
         max = Statistics.threads.length;
     visibleGraphs = [];
     for (var i = min; i < max; i++)
@@ -117,25 +113,25 @@ function login() {
 }
 
 function start() {
-    //txt.text("Gathering statistics");
-    $("<a/>", {
-        "class": "btn btn-lg btn-primary centered",
-        html: "<span id=threadload>Gathering statistics</span> <img src=loader.gif alt=\"loading..\">",
-    }).appendTo("#threadcount");
-
-    $("<a/>", {
-        class: "btn btn-lg btn-primary centered",
-        html: "Select a person on the left",
-        id: "rswait"
-    }).appendTo("#threadtime");
-
-    if (Statistics.load()) {
-        Statistics.graphThreads();
-    } else {
-        Statistics.countThreads();
-    }
-    $("#loginbutton").fadeOut();
-    //butt.hide();
+    $("#logintext").text("Loading local cache");
+    setTimeout(function() { // delay loading cache
+        var loaded = Statistics.load();
+        $("<a/>", {
+            "class": "btn btn-lg btn-primary centered",
+            html: "<span id=threadload>Gathering statistics</span> <img src=loader.gif alt=\"loading..\">",
+        }).appendTo("#threadcount");
+        $("<a/>", {
+            class: "btn btn-lg btn-primary centered",
+            html: "Select a person on the left",
+            id: "rswait"
+        }).appendTo("#threadtime");
+        if (loaded) {
+            Statistics.graphThreads();
+        } else {
+            Statistics.countThreads();
+        }
+        $("#loginbutton").fadeOut();
+    }, 500);
 }
 
 /**
@@ -201,8 +197,12 @@ function log(e: IArguments): void {
     console.groupEnd();
 }
 
-function mapTimestampsToDays(messages: Message[]): number[][] {
+function mapTimestampsToDays(tid:number, messages: Message[]): number[][] {
     var days: { [index: number]: number } = {};
+    if(messages.length==0) {
+        //console.log("warn: tried to map zero length array (thread "+tid+")");
+        return null;
+    }
     var current = new Date(0);
     var next = new Date(messages[0].timestamp);
     next.setHours(0);
@@ -276,263 +276,27 @@ function storageGetObject(key: string) {
 
 function addSeries(label: string, threadID: number, messages: Message[], mapped: { label: string; data: number[][] }[]) {
     if (Settings.Graph.separateInOut) {
-        mapped.push({
+        var dataIn=mapTimestampsToDays(threadID, messages.filter((m) => m.from.id !== user.userID));
+        var dataOut=mapTimestampsToDays(threadID, messages.filter((m) => m.from.id === user.userID))
+        if(dataIn!==null) mapped.push({
             label: label + "|In",
             stack: Settings.Graph.stacked ? 1 : threadID,
             color: getColor(threadID, true),
-            data: mapTimestampsToDays(messages.filter((m) => m.from.id !== user.userID))
+            data: dataIn
         });
-        mapped.push({
+        if(dataOut!==null) mapped.push({
             label: label + "|Out",
             stack: Settings.Graph.stacked ? 1 : threadID,
             color: getColor(threadID, false),
-            data: mapTimestampsToDays(messages.filter((m) => m.from.id === user.userID))
+            data: dataOut
         });
     } else {
         mapped.push({
             label: label,
             stack: Settings.Graph.stacked ? "true" : null,
             color: getColor(threadID, true),
-            data: mapTimestampsToDays(messages)
+            data: mapTimestampsToDays(threadID, messages)
         });
-    }
-}
-
-class Statistics {
-    static lastUpdate = 0;
-    static threads: Thread[] = [];
-    static reducedThreads: Thread[] = [];
-    static threadPlot: jquery.flot.plot;
-    static messagePlot: jquery.flot.plot;
-    static version = "2";
-    static save() {
-        localStorage.setItem("lastUpdate", "" + Statistics.lastUpdate);
-        localStorage.setItem("fbstatsversion", Statistics.version);
-        if (Statistics.lastUpdate == 0)
-            Statistics.threads = [];
-        storageSetObject("threads", Statistics.threads);
-    }
-    static load() {
-        var last = localStorage.getItem("lastUpdate");
-        var savedversion = localStorage.getItem("fbstatsversion");
-        if (savedversion !== Statistics.version || !last || (Date.now() - parseInt(last, 10) > 1000 * Settings.cacheTime))
-            return false;
-        //could not load/cache too old
-        Statistics.threads = storageGetObject("threads");
-        return true;
-    }
-    static countThreads(offset: number = 0) {
-        var query = "select participants,num_messages,thread_id from unified_thread where folder='inbox' LIMIT " + Settings.AJAX.threadGetLimit + " OFFSET " + offset;
-        FBfql(query, function(response) {
-            if (!$.isArray(response)) {
-                //error
-                $("#threadload").text("Error " + response.error_code + ": " + response.error_msg);
-                console.log("Error: ", response);
-                return;
-            }
-            //log(arguments);
-            for (var i = 0; i < response.length; i++) {
-                //console.log(response[i]);
-                if (response[i].num_messages < Settings.ignoreBelowMessageCount)
-                    continue;
-                Statistics.threads.push(new Thread(response[i]));
-            }
-            $("#threadload").text("Getting thread " + Statistics.threads.length);
-            if (response.length == 0) {//<threadGetLimit) {
-                Statistics.threads.sort(function(a, b) {
-					return b.count - a.count
-				});
-                Statistics.lastUpdate = Date.now();
-                Statistics.graphThreads();
-            } else {
-                Statistics.countThreads(offset + response.length);
-            }
-        });
-    }
-    static graphThreads() {
-        Statistics.reducedThreads = [];
-        var otherCount = 0;
-        for (var i = 0; i < Statistics.threads.length; i++) {
-            if (i >= Settings.maxThreadCount)
-                otherCount += Statistics.threads[i].count;
-            else
-                Statistics.reducedThreads.push(Statistics.threads[i]);
-        }
-        var data: any = [$.map(Statistics.reducedThreads, function(t, i) {
-			return [[t.count, threadName(i, t)]]
-		})];
-        data[0].push([otherCount, "Other"]);
-        //window.dat2a=data;
-        Statistics.threadPlot = $.plot($("#threadcount"), data, {
-            series: {
-                bars: {
-                    show: true,
-                    align: "center",
-                    barWidth: 0.6,
-                    horizontal: true
-                }
-            },
-            grid: {
-                hoverable: true,
-                clickable: true,
-            },
-            yaxis: {
-                mode: "categories",
-                transform: function(a) {
-					return -a
-				},
-                inverseTransform: function(a) {
-					return -a
-				}
-            },
-            xaxis: jQuery.extend({
-                position: "top",
-            }, scales[Settings.Graph.scale]),
-        });
-        $("#threadcount").off("plotclick");
-        $("#threadcount").on("plotclick", function(evt: any, pos: number, itm: any) {
-            if (!itm)
-                return;
-            var index = itm.datapoint[1];
-            if (index == Settings.maxThreadCount)
-                return;
-            var contained = visibleGraphs.indexOf(index);
-            if (contained < 0) {
-                visibleGraphs.push(index);
-            } else {
-                visibleGraphs.splice(contained, 1);
-            }
-            Statistics.graphMessages();
-        });
-    }
-    static messageTimestamps(tid: number, offset = 0) {
-        var thread = Statistics.threads[tid];
-        var what = "timestamp,sender";
-        if (Settings.downloadMessageBodies)
-            what += ",body,attachment_map";
-        var query = "select " + what + " from unified_message where thread_id='" + thread.id + "' LIMIT " + Settings.AJAX.messageGetLimit + " OFFSET  " + offset;
-        FBfql(query, function(response) {
-            if (!$.isArray(response)) {
-                //error
-                $("#msgload").text("Error " + response.error_code + ": " + response.error_msg);
-                console.log("Error: ", response);
-                return;
-            }
-            for (var i = 0; i < response.length; i++) {
-                var stamp = parseInt(response[i].timestamp, 10);
-                if (stamp >= 1072915200000) {// from before 2004 is probably invalid data
-                    thread.messages.push(new Message(stamp, response[i].body, response[i].sender ? new Person(response[i].sender) : undefined, response[i].attachment_map));
-                }
-            }
-            $("#msgload").text("Downloading " + (Settings.downloadMessageBodies ? "message" : "timestamp") + " " + thread.messages.length + " / " + thread.count + " from thread " + tid + " (" + threadName(tid, thread, 20) + ")");
-            if (response.length == 0) {
-                thread.messages.sort();
-                Statistics.lastUpdate = Date.now();
-                Statistics.graphMessages();
-            } else {
-                Statistics.messageTimestamps(tid, offset + response.length);
-            }
-        });
-    }
-    static graphMessages() {
-        if (visibleGraphs.length > 0)
-            $("#rswait").hide();
-        var mapped: { label: string; data: number[][] }[] = [];
-        var otherMessages: Message[] = [];
-
-        for (var t = 0; t < Statistics.threads.length; t++) {
-            var shown = visibleGraphs.indexOf(t) != -1;
-            var thread = Statistics.threads[t];
-            if (shown && (!thread.messages || thread.messages.length == 0)) {
-                console.log("warn: messages not downloaded for thread " + t + ", downloading..");
-                if ($("#msgload").length == 0) {
-                    $("<a/>", {
-                        class: "btn btn-lg btn-primary centered",
-                        html: "<span id=msgload>Downloading thread</span> <img src=loader.gif>"
-                    }).appendTo("#threadtime");
-                }
-                Statistics.messageTimestamps(t);
-                return;
-            }
-            if (shown) {
-                addSeries(threadName(t, thread), t, thread.messages, mapped);
-            } else if (Settings.displayOtherMessages) {
-                otherMessages = otherMessages.concat(thread.messages);
-            }
-        }
-        if (Settings.displayOtherMessages) {
-            otherMessages.sort(function(a, b) {
-                return a.timestamp - b.timestamp;
-            });
-            if (otherMessages.length > 0) {
-                addSeries(visibleGraphs.length > 0 ? "Other" : "All", -1, otherMessages, mapped);
-            }
-        }
-        // add missing data
-        var first = 1e100;
-        var last = 0;
-        for (var t = 0; t < mapped.length; t++) {
-            var curfirst = mapped[t].data[0][0];
-            var curlast = mapped[t].data[mapped[t].data.length - 1][0];
-            if (curfirst < first)
-                first = curfirst;
-            if (curlast > last)
-                last = curlast;
-        }
-        for (var t = 0; t < mapped.length; t++) {
-            var arr = mapped[t].data;
-            while (arr[0][0] > first) {
-                var date = new Date(+arr[0][0]);
-                date.addInterval(-1);
-                arr.unshift([date.getTime(), 0]);
-            }
-            while (arr[arr.length - 1][0] < last) {
-                var date = new Date(+arr[arr.length - 1][0]);
-                date.addInterval(1);
-                arr.push([date.getTime(), 0]);
-            }
-        }
-
-        Statistics.messagePlot = $.plot($("#threadtime"), mapped, {
-            xaxis: {
-                mode: 'time'
-            },
-            yaxis: scales[Settings.Graph.scale],
-            legend: {
-                position: "nw"
-            },
-            series: {
-                shadowSize: 0
-            },
-            lines: {
-                show: true,
-                lineWidth: 0,
-                fillColor: {
-                    colors: [{
-                        opacity: (Settings.Graph.stacked ? 1 : 0.65)
-                    }, {
-                            opacity: (Settings.Graph.stacked ? 0.99 : 0.64)
-                        }]
-                },
-                fill: true,
-                steps: Settings.Graph.steps
-            },
-            colors: plotcolors
-        });
-    }
-    static exportToCSV() {
-        var s = "Thread,From,Date,Message,Attachments\n";
-        for (var t = 0; t < Statistics.threads.length; t++) {
-            var tt = Statistics.threads[t], n = threadName(t, tt);
-            for (var m = 0; m < tt.messages.length; m++) {
-                var msg = tt.messages[m];
-                s += '"'+[n, msg.from.name, new Date(msg.timestamp).toISOString(), msg.message.replace(/"/g,'""'), JSON.stringify(msg.attachments).replace(/"/g,'""')].join('","') + "\"\n";
-            }
-        };
-        var a = <HTMLAnchorElement>document.body.appendChild(document.createElement("a"));
-        a.href = URL.createObjectURL(new Blob([s], { type: "text/csv" }));
-        (<any>a).download = "Facebook-Messages.csv";
-        a.click();
     }
 }
 

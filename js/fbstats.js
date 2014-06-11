@@ -1,3 +1,6 @@
+/**
+* source: https://github.com/phiresky/fbstats
+*/
 var user = {
     userID: "unknown"
 };
@@ -25,6 +28,7 @@ var Settings = {
         smoothAmount: 0,
         separateInOut: true,
         stacked: true,
+        unstackedOpacity: 0.8,
         steps: true,
         scale: "linear",
         grouping: 1 /* weekly */
@@ -38,7 +42,7 @@ function getColor(tid, isIn) {
         color = otherColor;
     else
         color = plotcolors[tid % plotcolors.length];
-    return toRGBA(hexToRGB(color, isIn ? 1.0 : 0.7));
+    return toRGBA(hexToRGB(color, isIn ? 1.0 : 0.8));
 }
 var otherColor = "#999999";
 var scales = {
@@ -61,12 +65,6 @@ var scales = {
     }
 };
 
-/**
-* @param {number} t thread id
-* @param {Thread} thread thread object
-* @param {number?} maxlength
-* @return {string}
-*/
 function threadName(t, thread, maxlength) {
     if (typeof maxlength === "undefined") { maxlength = 50; }
     if (t == -1)
@@ -101,9 +99,9 @@ function toRGBA(hex, a) {
 * @param {number} max
 */
 function getAll(max, min) {
-    if (!min)
-        min = 0;
-    if (!max)
+    if (typeof max === "undefined") { max = Statistics.threads.length; }
+    if (typeof min === "undefined") { min = 0; }
+    if (max === null)
         max = Statistics.threads.length;
     visibleGraphs = [];
     for (var i = min; i < max; i++)
@@ -133,25 +131,25 @@ function login() {
 }
 
 function start() {
-    //txt.text("Gathering statistics");
-    $("<a/>", {
-        "class": "btn btn-lg btn-primary centered",
-        html: "<span id=threadload>Gathering statistics</span> <img src=loader.gif alt=\"loading..\">"
-    }).appendTo("#threadcount");
-
-    $("<a/>", {
-        class: "btn btn-lg btn-primary centered",
-        html: "Select a person on the left",
-        id: "rswait"
-    }).appendTo("#threadtime");
-
-    if (Statistics.load()) {
-        Statistics.graphThreads();
-    } else {
-        Statistics.countThreads();
-    }
-    $("#loginbutton").fadeOut();
-    //butt.hide();
+    $("#logintext").text("Loading local cache");
+    setTimeout(function () {
+        var loaded = Statistics.load();
+        $("<a/>", {
+            "class": "btn btn-lg btn-primary centered",
+            html: "<span id=threadload>Gathering statistics</span> <img src=loader.gif alt=\"loading..\">"
+        }).appendTo("#threadcount");
+        $("<a/>", {
+            class: "btn btn-lg btn-primary centered",
+            html: "Select a person on the left",
+            id: "rswait"
+        }).appendTo("#threadtime");
+        if (loaded) {
+            Statistics.graphThreads();
+        } else {
+            Statistics.countThreads();
+        }
+        $("#loginbutton").fadeOut();
+    }, 500);
 }
 
 /**
@@ -216,8 +214,12 @@ function log(e) {
     console.groupEnd();
 }
 
-function mapTimestampsToDays(messages) {
+function mapTimestampsToDays(tid, messages) {
     var days = {};
+    if (messages.length == 0) {
+        //console.log("warn: tried to map zero length array (thread "+tid+")");
+        return null;
+    }
     var current = new Date(0);
     var next = new Date(messages[0].timestamp);
     next.setHours(0);
@@ -290,32 +292,147 @@ function storageGetObject(key) {
 
 function addSeries(label, threadID, messages, mapped) {
     if (Settings.Graph.separateInOut) {
-        mapped.push({
-            label: label + "|In",
-            stack: Settings.Graph.stacked ? 1 : threadID,
-            color: getColor(threadID, true),
-            data: mapTimestampsToDays(messages.filter(function (m) {
-                return m.from.id !== user.userID;
-            }))
-        });
-        mapped.push({
-            label: label + "|Out",
-            stack: Settings.Graph.stacked ? 1 : threadID,
-            color: getColor(threadID, false),
-            data: mapTimestampsToDays(messages.filter(function (m) {
-                return m.from.id === user.userID;
-            }))
-        });
+        var dataIn = mapTimestampsToDays(threadID, messages.filter(function (m) {
+            return m.from.id !== user.userID;
+        }));
+        var dataOut = mapTimestampsToDays(threadID, messages.filter(function (m) {
+            return m.from.id === user.userID;
+        }));
+        if (dataIn !== null)
+            mapped.push({
+                label: label + "|In",
+                stack: Settings.Graph.stacked ? 1 : threadID,
+                color: getColor(threadID, true),
+                data: dataIn
+            });
+        if (dataOut !== null)
+            mapped.push({
+                label: label + "|Out",
+                stack: Settings.Graph.stacked ? 1 : threadID,
+                color: getColor(threadID, false),
+                data: dataOut
+            });
     } else {
         mapped.push({
             label: label,
             stack: Settings.Graph.stacked ? "true" : null,
             color: getColor(threadID, true),
-            data: mapTimestampsToDays(messages)
+            data: mapTimestampsToDays(threadID, messages)
         });
     }
 }
 
+Date.prototype.getWeek = function () {
+    var onejan = new Date(this.getFullYear(), 0, 1);
+    return Math.ceil((((this.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
+};
+Date.prototype.addInterval = function (i) {
+    switch (Settings.Graph.grouping) {
+        case 2 /* monthly */:
+            this.setMonth(this.getMonth() + i);
+            break;
+        case 1 /* weekly */:
+            this.setDate(this.getDate() + 7 * i);
+            break;
+        case 0 /* daily */:
+            this.setDate(this.getDate() + i);
+            break;
+    }
+};
+$(function () {
+    var butt = $("#loginbutton");
+    var txt = $("#logintext");
+    var img = butt.children("img");
+    butt.hide();
+    $("#appidform").submit(function () {
+        try  {
+            event.preventDefault();
+            init($("#appidinput").val());
+            $("#settings").show();
+            $(this).hide();
+        } catch (e) {
+            $(".errormessage").append(e).fadeIn();
+            throw e;
+        }
+    });
+    var scaleselect = $("#scaleselect").change(function () {
+        Settings.Graph.scale = $(this).val();
+        Statistics.graphThreads();
+        Statistics.graphMessages();
+    });
+    for (var s in scales) {
+        $("<option/>").text(s).appendTo(scaleselect);
+    }
+
+    $(".fbstats-bool").on("change", function () {
+        var setting = this.dataset.setting;
+        if (eval(setting) === undefined)
+            throw new Error("unknown setting " + setting);
+        eval(setting + '=' + this.checked);
+        if (this.dataset.norefresh === undefined) {
+            if (this.dataset.redrawThreads !== undefined)
+                Statistics.graphThreads();
+            Statistics.graphMessages();
+        }
+    }).each(function () {
+        this.checked = eval(this.dataset.setting);
+    });
+
+    $("#groupingselect").change(function () {
+        Settings.Graph.grouping = +TimeGrouping[this.value];
+        Statistics.graphThreads();
+        Statistics.graphMessages();
+    });
+
+    $("#threadcountinput").change(function () {
+        var c = $(this).val() || 15;
+        if (c < 3)
+            c = 3;
+        if (c > 50)
+            c = 50;
+        $(this).val(c);
+        Settings.maxThreadCount = c;
+        Statistics.graphThreads();
+    });
+
+    $(window).on("beforeunload", function () {
+        if (Statistics.lastUpdate && Statistics.threads.length > 0)
+            Statistics.save();
+    });
+});
+//} catch(e) {$(".errormessage").append(e).fadeIn();throw e;}
+var Message = (function () {
+    function Message(timestamp, message, from, attachments) {
+        this.timestamp = timestamp;
+        this.message = message;
+        this.from = from;
+        this.attachments = attachments;
+    }
+    return Message;
+})();
+var Thread = (function () {
+    function Thread(inputobj) {
+        this.messages = [];
+        this.people = [];
+        this.count = parseInt(inputobj.num_messages || "0", 10);
+        this.people = [];
+        this.id = inputobj.thread_id;
+        for (var i = 0; i < inputobj.participants.length; i++) {
+            var p = new Person(inputobj.participants[i]);
+            if (p.id == user.userID)
+                continue;
+            this.people.push(p);
+        }
+    }
+    return Thread;
+})();
+var Person = (function () {
+    function Person(inputobj) {
+        this.id = inputobj.user_id || "0";
+        this.name = (typeof inputobj.name == "undefined") ? "Andere" : inputobj.name;
+    }
+    return Person;
+})();
 var Statistics = (function () {
     function Statistics() {
     }
@@ -430,6 +547,7 @@ var Statistics = (function () {
             what += ",body,attachment_map";
         var query = "select " + what + " from unified_message where thread_id='" + thread.id + "' LIMIT " + Settings.AJAX.messageGetLimit + " OFFSET  " + offset;
         FBfql(query, function (response) {
+            console.log(response);
             if (!$.isArray(response)) {
                 //error
                 $("#msgload").text("Error " + response.error_code + ": " + response.error_msg);
@@ -461,8 +579,12 @@ var Statistics = (function () {
         for (var t = 0; t < Statistics.threads.length; t++) {
             var shown = visibleGraphs.indexOf(t) != -1;
             var thread = Statistics.threads[t];
-            if (shown && (!thread.messages || thread.messages.length == 0)) {
-                console.log("warn: messages not downloaded for thread " + t + ", downloading..");
+            if (shown && (!thread.messages || thread.messages.length == 0 || thread.messages.length !== thread.count)) {
+                if (thread.messages.length > 0) {
+                    console.log("warn: messages for thread " + t + " incomplete, resetting..");
+                    thread.messages = [];
+                }
+                console.log("Downloading thread " + t);
                 if ($("#msgload").length == 0) {
                     $("<a/>", {
                         class: "btn btn-lg btn-primary centered",
@@ -529,9 +651,9 @@ var Statistics = (function () {
                 fillColor: {
                     colors: [
                         {
-                            opacity: (Settings.Graph.stacked ? 1 : 0.65)
+                            opacity: (Settings.Graph.stacked ? 1 : Settings.Graph.unstackedOpacity)
                         }, {
-                            opacity: (Settings.Graph.stacked ? 0.99 : 0.64)
+                            opacity: (Settings.Graph.stacked ? 0.99 : Settings.Graph.unstackedOpacity - 0.01)
                         }]
                 },
                 fill: true,
@@ -562,118 +684,6 @@ var Statistics = (function () {
     Statistics.version = "2";
     return Statistics;
 })();
-
-Date.prototype.getWeek = function () {
-    var onejan = new Date(this.getFullYear(), 0, 1);
-    return Math.ceil((((this.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
-};
-Date.prototype.addInterval = function (i) {
-    switch (Settings.Graph.grouping) {
-        case 2 /* monthly */:
-            this.setMonth(this.getMonth() + i);
-            break;
-        case 1 /* weekly */:
-            this.setDate(this.getDate() + 7 * i);
-            break;
-        case 0 /* daily */:
-            this.setDate(this.getDate() + i);
-            break;
-    }
-};
-$(function () {
-    var butt = $("#loginbutton");
-    var txt = $("#logintext");
-    var img = butt.children("img");
-    butt.hide();
-    $("#appidform").submit(function () {
-        try  {
-            event.preventDefault();
-            init($("#appidinput").val());
-            $("#settings").show();
-            $(this).hide();
-        } catch (e) {
-            $(".errormessage").append(e).fadeIn();
-            throw e;
-        }
-    });
-    var scaleselect = $("#scaleselect").change(function () {
-        Settings.Graph.scale = $(this).val();
-        Statistics.graphThreads();
-        Statistics.graphMessages();
-    });
-    for (var s in scales) {
-        $("<option/>").text(s).appendTo(scaleselect);
-    }
-
-    $(".fbstats-bool").on("change", function () {
-        var setting = this.dataset.setting;
-        if (eval(setting) === undefined)
-            throw new Error("unknown setting " + setting);
-        eval(setting + '=' + this.checked);
-        if (this.dataset.norefresh === undefined) {
-            if (this.dataset.redrawThreads !== undefined)
-                Statistics.graphThreads();
-            Statistics.graphMessages();
-        }
-    }).each(function () {
-        this.checked = eval(this.dataset.setting);
-    });
-
-    $("#groupingselect").change(function () {
-        Settings.Graph.grouping = +TimeGrouping[this.value];
-        Statistics.graphThreads();
-        Statistics.graphMessages();
-    });
-
-    $("#threadcountinput").change(function () {
-        var c = $(this).val() || 15;
-        if (c < 3)
-            c = 3;
-        if (c > 50)
-            c = 50;
-        $(this).val(c);
-        Settings.maxThreadCount = c;
-        Statistics.graphThreads();
-    });
-
-    $(window).on("beforeunload", function () {
-        if (Statistics.lastUpdate && Statistics.threads.length > 0)
-            Statistics.save();
-    });
-});
-//} catch(e) {$(".errormessage").append(e).fadeIn();throw e;}
-var Message = (function () {
-    function Message(timestamp, message, from, attachments) {
-        this.timestamp = timestamp;
-        this.message = message;
-        this.from = from;
-        this.attachments = attachments;
-    }
-    return Message;
-})();
-var Thread = (function () {
-    function Thread(inputobj) {
-        this.messages = [];
-        this.people = [];
-        this.count = parseInt(inputobj.num_messages || "0", 10);
-        this.people = [];
-        this.id = inputobj.thread_id;
-        for (var i = 0; i < inputobj.participants.length; i++) {
-            var p = new Person(inputobj.participants[i]);
-            if (p.id == user.userID)
-                continue;
-            this.people.push(p);
-        }
-    }
-    return Thread;
-})();
-var Person = (function () {
-    function Person(inputobj) {
-        this.id = inputobj.user_id || "0";
-        this.name = (typeof inputobj.name == "undefined") ? "Andere" : inputobj.name;
-    }
-    return Person;
-})();
 /**
 * source: https://github.com/phiresky/fbstats
 * to be compiled with closure compiler
@@ -683,4 +693,5 @@ var Person = (function () {
 /// <reference path="inc/jquery.flot.d.ts" />
 /// <reference path="main.ts" />
 /// <reference path="classes.ts" />
+/// <reference path="statistics.ts" />
 //# sourceMappingURL=fbstats.js.map

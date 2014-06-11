@@ -7,3 +7,4 @@
 /// <reference path="inc/jquery.flot.d.ts" />
 /// <reference path="main.ts" />
 /// <reference path="classes.ts" />
+/// <reference path="statistics.ts" />
