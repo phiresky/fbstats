@@ -14,7 +14,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	}
 	.centered {
 		position:absolute;
-		margin-top:-50px;
+		margin-top:-100px;
 		margin-left:-150px;
 		top:50%;
 		left:50%;
@@ -31,7 +31,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 		position:relative;
 		display:inline-block;vertical-ali
 		}
-		#threadcount,#threadtime {
+	#threadcount,#threadtime {
 		width:100%;
 		height:100%;
 		position:relative;
@@ -45,7 +45,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 		position:fixed; top:20%; left:50%; margin-left:-150px; width:300px;z-index:999;
 	}
 </style>
-<div id="debugDiv" style="display:none;border: 1px solid black" ></div>
+<div id="debugDiv" style="display:none;border: 1px solid black" >Errors:<br></div>
 <div class="container">
 	<div class="centered">
 		<div class="alert alert-danger errormessage" style="display:none"><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
@@ -56,6 +56,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 				<label for="appidinput">Your App ID</label>
 				<input type="text" class="form-control" id="appidinput" placeholder="App ID">
 			</div>
+			<p></p><input type=checkbox class="fbstats-bool" data-setting="Settings.downloadMessageBodies" data-norefresh> Download message contents</p>
 			<button type="submit" class="btn btn-default">
 				Begin
 			</button>
@@ -70,20 +71,24 @@ uses the unified_thread api which is not available to the public since 2012: htt
 			<div id="threadtime"></div>
 		</div>
 	</div>
+	<div id="settings" style="display:none;">
 	Smoothness: <span id=smth>0</span></label>
-	<input id="smoothSlide" type="range" min=0 max=20 value=1 onchange="smooth=smth.innerText=this.value;Statistics.graphMessages()">
+	<input id="smoothSlide" type="range" min=0 max=20 value=1 onchange="Settings.Graph.smoothAmount=smth.innerText=this.value;Statistics.graphMessages()">
 	<br>
 	Stacked:
-	<input type="checkbox" checked onclick="stacked=this.checked;Statistics.graphMessages()">
+	<input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.stacked">
 	<br>
 	Steps:
-	<input type="checkbox" checked onclick="steps=this.checked;Statistics.graphMessages()">
+	<input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.steps">
+	<br>
+	Separate incoming and outgoing:
+	<input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.separateInOut">
 	<br>
 	Anonymous:
-	<input type="checkbox" onclick="anonymous=this.checked;Statistics.graphThreads();Statistics.graphMessages()">
+	<input type="checkbox" class="fbstats-bool" data-setting="Settings.anonymous" data-redrawThreads>
 	<br>
 	Display other messages:
-	<input type="checkbox" checked onclick="other=this.checked;Statistics.graphThreads();Statistics.graphMessages()">
+	<input type="checkbox" class="fbstats-bool" data-setting="Settings.displayOtherMessages">
 	<br>
 	Scale: <select id="scaleselect"></select>
 	<br>
@@ -107,6 +112,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	<button onclick="Statistics.lastUpdate=0;Statistics.save();document.location.reload();">
 		Clear local cache
 	</button>
+	</div>
 </div>
 <!--[if lt IE 9 ]>
 <script>
@@ -124,7 +130,9 @@ document.execCommand('Stop');
 <script src="js/jquery.flot.resize.min.js"></script>
 <script src="js/jquery.flot.stack.min.js"></script>
 <script src="js/jquery-ui.custom.min.js"></script>
-<script src="js/fbstats.min.js"></script>
+<script src="js/lz-string-1.3.3-min.js"></script>
+<script src="js/fbstats.js"></script>
+
 <script>
 if(location.search.indexOf("debug")>=0) $("#debugDiv").show();
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
