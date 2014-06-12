@@ -10,28 +10,6 @@ enum TimeGrouping {
     daily, weekly, monthly, END
 }
 
-var Settings = {
-    ignoreBelowMessageCount: 20,
-    displayOtherMessages: true,
-    anonymous: false,
-    AJAX: {
-        threadGetLimit: 100,
-        messageGetLimit: 502
-    },
-    cacheTime: 60 * 60 * 24,
-    maxThreadCount: 20,
-    downloadMessageBodies: false,
-
-    Graph: {
-        smoothAmount: 0,
-        separateInOut: true,
-        stacked: true,
-        unstackedOpacity:0.8,
-        steps: true,
-        scale: "linear",
-        grouping: TimeGrouping.weekly,
-    }
-}
 var visibleGraphs: number[] = [];
 var plotcolors = ["#942727", "#5DA5DA", "#FAA43A", "#60BD68", "#F17CB0", "#B2912F", "#B276B2", "#DECF3F", "#F15854", "#4D4D4D"];
 function getColor(tid: number, isIn: boolean) {
@@ -280,20 +258,20 @@ function addSeries(label: string, threadID: number, messages: Message[], mapped:
         var dataOut=mapTimestampsToDays(threadID, messages.filter((m) => m.from.id === user.userID))
         if(dataIn!==null) mapped.push({
             label: label + "|In",
-            stack: Settings.Graph.stacked ? 1 : threadID,
+            stack: (Settings.Graph.stackThreads ? 1 : threadID)+(Settings.Graph.stackInOut ? 0 : 1e9),
             color: getColor(threadID, true),
             data: dataIn
         });
         if(dataOut!==null) mapped.push({
             label: label + "|Out",
-            stack: Settings.Graph.stacked ? 1 : threadID,
+            stack: (Settings.Graph.stackThreads ? 1 : threadID),
             color: getColor(threadID, false),
             data: dataOut
         });
     } else {
         mapped.push({
             label: label,
-            stack: Settings.Graph.stacked ? "true" : null,
+            stack: Settings.Graph.stackThreads ? "true" : null,
             color: getColor(threadID, true),
             data: mapTimestampsToDays(threadID, messages)
         });
@@ -319,6 +297,7 @@ Date.prototype.addInterval = function(i: number) {
     }
 }
 $(function() {
+    loadSettings();
     var butt = $("#loginbutton");
     var txt = $("#logintext");
     var img = butt.children("img");
@@ -370,6 +349,7 @@ $(function() {
     })
 
 	$(window).on("beforeunload", function() {
+	    saveSettings();
         if (Statistics.lastUpdate && Statistics.threads.length > 0)
             Statistics.save();
     });

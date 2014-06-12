@@ -8,3 +8,4 @@
 /// <reference path="main.ts" />
 /// <reference path="classes.ts" />
 /// <reference path="statistics.ts" />
+/// <reference path="settings.ts" />

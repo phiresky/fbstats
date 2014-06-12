@@ -13,27 +13,6 @@ var TimeGrouping;
     TimeGrouping[TimeGrouping["END"] = 3] = "END";
 })(TimeGrouping || (TimeGrouping = {}));
 
-var Settings = {
-    ignoreBelowMessageCount: 20,
-    displayOtherMessages: true,
-    anonymous: false,
-    AJAX: {
-        threadGetLimit: 100,
-        messageGetLimit: 502
-    },
-    cacheTime: 60 * 60 * 24,
-    maxThreadCount: 20,
-    downloadMessageBodies: false,
-    Graph: {
-        smoothAmount: 0,
-        separateInOut: true,
-        stacked: true,
-        unstackedOpacity: 0.8,
-        steps: true,
-        scale: "linear",
-        grouping: 1 /* weekly */
-    }
-};
 var visibleGraphs = [];
 var plotcolors = ["#942727", "#5DA5DA", "#FAA43A", "#60BD68", "#F17CB0", "#B2912F", "#B276B2", "#DECF3F", "#F15854", "#4D4D4D"];
 function getColor(tid, isIn) {
@@ -301,21 +280,21 @@ function addSeries(label, threadID, messages, mapped) {
         if (dataIn !== null)
             mapped.push({
                 label: label + "|In",
-                stack: Settings.Graph.stacked ? 1 : threadID,
+                stack: (Settings.Graph.stackThreads ? 1 : threadID) + (Settings.Graph.stackInOut ? 0 : 1e9),
                 color: getColor(threadID, true),
                 data: dataIn
             });
         if (dataOut !== null)
             mapped.push({
                 label: label + "|Out",
-                stack: Settings.Graph.stacked ? 1 : threadID,
+                stack: (Settings.Graph.stackThreads ? 1 : threadID),
                 color: getColor(threadID, false),
                 data: dataOut
             });
     } else {
         mapped.push({
             label: label,
-            stack: Settings.Graph.stacked ? "true" : null,
+            stack: Settings.Graph.stackThreads ? "true" : null,
             color: getColor(threadID, true),
             data: mapTimestampsToDays(threadID, messages)
         });
@@ -340,6 +319,7 @@ Date.prototype.addInterval = function (i) {
     }
 };
 $(function () {
+    loadSettings();
     var butt = $("#loginbutton");
     var txt = $("#logintext");
     var img = butt.children("img");
@@ -396,6 +376,7 @@ $(function () {
     });
 
     $(window).on("beforeunload", function () {
+        saveSettings();
         if (Statistics.lastUpdate && Statistics.threads.length > 0)
             Statistics.save();
     });
@@ -503,12 +484,16 @@ var Statistics = (function () {
                     show: true,
                     align: "center",
                     barWidth: 0.6,
-                    horizontal: true
-                }
+                    horizontal: true,
+                    color: toRGBA(hexToRGB("#ffc508", 1), 0.8),
+                    fillColor: toRGBA(hexToRGB("#ffc508", 1), 0.5)
+                },
+                highlightColor: toRGBA(hexToRGB("#00bd10", 1), 0.5)
             },
             grid: {
                 hoverable: true,
-                clickable: true
+                clickable: true,
+                autoHighlight: false
             },
             yaxis: {
                 mode: "categories",
@@ -523,8 +508,12 @@ var Statistics = (function () {
                 position: "top"
             }, scales[Settings.Graph.scale])
         });
-        $("#threadcount").off("plotclick");
-        $("#threadcount").on("plotclick", function (evt, pos, itm) {
+        $("#threadcount").off("plotclick").off("plothover").on("plothover", function (evt, pos, itm) {
+            if (!itm)
+                document.body.style.cursor = 'default';
+            else if (itm.datapoint[1] < Settings.maxThreadCount)
+                document.body.style.cursor = 'pointer';
+        }).on("plotclick", function (evt, pos, itm) {
             if (!itm)
                 return;
             var index = itm.datapoint[1];
@@ -578,6 +567,10 @@ var Statistics = (function () {
 
         for (var t = 0; t < Statistics.threads.length; t++) {
             var shown = visibleGraphs.indexOf(t) != -1;
+            if (shown)
+                Statistics.threadPlot.highlight(0, t);
+            else
+                Statistics.threadPlot.unhighlight(0, t);
             var thread = Statistics.threads[t];
             if (shown && (!thread.messages || thread.messages.length == 0 || thread.messages.length !== thread.count)) {
                 if (thread.messages.length > 0) {
@@ -651,9 +644,9 @@ var Statistics = (function () {
                 fillColor: {
                     colors: [
                         {
-                            opacity: (Settings.Graph.stacked ? 1 : Settings.Graph.unstackedOpacity)
+                            opacity: (Settings.Graph.stackThreads || Settings.Graph.stackInOut ? 1 : Settings.Graph.unstackedOpacity)
                         }, {
-                            opacity: (Settings.Graph.stacked ? 0.99 : Settings.Graph.unstackedOpacity - 0.01)
+                            opacity: (Settings.Graph.stackThreads || Settings.Graph.stackInOut ? 0.99 : Settings.Graph.unstackedOpacity - 0.01)
                         }]
                 },
                 fill: true,
@@ -684,6 +677,37 @@ var Statistics = (function () {
     Statistics.version = "2";
     return Statistics;
 })();
+var DefaultSettings = {
+    ignoreBelowMessageCount: 20,
+    displayOtherMessages: true,
+    anonymous: false,
+    AJAX: {
+        threadGetLimit: 100,
+        messageGetLimit: 502
+    },
+    cacheTime: 60 * 60 * 24,
+    maxThreadCount: 20,
+    downloadMessageBodies: false,
+    Graph: {
+        smoothAmount: 0,
+        separateInOut: true,
+        stackThreads: true,
+        stackInOut: true,
+        unstackedOpacity: 0.8,
+        steps: true,
+        scale: "linear",
+        grouping: 1 /* weekly */
+    }
+};
+var Settings = DefaultSettings;
+
+function loadSettings() {
+    Settings = storageGetObject("settings") || DefaultSettings;
+}
+
+function saveSettings() {
+    storageSetObject("settings", Settings);
+}
 /**
 * source: https://github.com/phiresky/fbstats
 * to be compiled with closure compiler
@@ -694,4 +718,5 @@ var Statistics = (function () {
 /// <reference path="main.ts" />
 /// <reference path="classes.ts" />
 /// <reference path="statistics.ts" />
+/// <reference path="settings.ts" />
 //# sourceMappingURL=fbstats.js.map

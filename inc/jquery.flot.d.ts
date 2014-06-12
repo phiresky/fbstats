@@ -194,8 +194,10 @@ declare module jquery.flot {
 
     interface plot {
         highlight(series: dataSeries, datapoint: item):any;
+        highlight(series: number, datapoint: number):any;
         unhightlight():any;
         unhighlight(series: dataSeries, datapoint: item):any;
+        unhighlight(series: number, datapoint: number):any;
         setData(data: any):any;
         setupGrid():any;
         draw():any;

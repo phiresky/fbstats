@@ -69,12 +69,16 @@ class Statistics {
                     show: true,
                     align: "center",
                     barWidth: 0.6,
-                    horizontal: true
-                }
+                    horizontal: true,
+                    color:toRGBA(hexToRGB("#ffc508",1),0.8),
+                    fillColor:toRGBA(hexToRGB("#ffc508",1),0.5)
+                },
+                highlightColor:toRGBA(hexToRGB("#00bd10",1),0.5)
             },
             grid: {
                 hoverable: true,
                 clickable: true,
+                autoHighlight: false
             },
             yaxis: {
                 mode: "categories",
@@ -89,8 +93,15 @@ class Statistics {
                 position: "top",
             }, scales[Settings.Graph.scale]),
         });
-        $("#threadcount").off("plotclick");
-        $("#threadcount").on("plotclick", function(evt: any, pos: number, itm: any) {
+        $("#threadcount")
+        .off("plotclick")
+        .off("plothover")
+        .on("plothover", function(evt: any, pos: number, itm: any) {
+            if (!itm) document.body.style.cursor = 'default';
+            else if(itm.datapoint[1]<Settings.maxThreadCount) document.body.style.cursor = 'pointer';
+            
+        })
+        .on("plotclick", function(evt: any, pos: number, itm: any) {
             if (!itm)
                 return;
             var index = itm.datapoint[1];
@@ -143,6 +154,8 @@ class Statistics {
 
         for (var t = 0; t < Statistics.threads.length; t++) {
             var shown = visibleGraphs.indexOf(t) != -1;
+            if(shown) Statistics.threadPlot.highlight(0,t);
+            else Statistics.threadPlot.unhighlight(0,t);
             var thread = Statistics.threads[t];
             if (shown && (!thread.messages || thread.messages.length == 0 || thread.messages.length !==thread.count)) {
                 if(thread.messages.length>0) {
@@ -214,9 +227,9 @@ class Statistics {
                 lineWidth: 0,
                 fillColor: {
                     colors: [{
-                        opacity: (Settings.Graph.stacked ? 1 : Settings.Graph.unstackedOpacity)
+                        opacity: (Settings.Graph.stackThreads||Settings.Graph.stackInOut ? 1 : Settings.Graph.unstackedOpacity)
                     }, {
-                            opacity: (Settings.Graph.stacked ? 0.99 : Settings.Graph.unstackedOpacity-0.01)
+                            opacity: (Settings.Graph.stackThreads||Settings.Graph.stackInOut ? 0.99 : Settings.Graph.unstackedOpacity-0.01)
                         }]
                 },
                 fill: true,

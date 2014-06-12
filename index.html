@@ -74,24 +74,27 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	<div id="settings" style="display:none;">
 	Smoothness: <span id=smth>0</span></label>
 	<input id="smoothSlide" type="range" min=0 max=20 value=1 onchange="Settings.Graph.smoothAmount=smth.innerText=this.value;Statistics.graphMessages()">
-	<br>
-	Stacked:
-	<input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.stacked">
-	<br>
-	Steps:
-	<input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.steps">
-	<br>
-	Separate incoming and outgoing:
-	<input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.separateInOut">
-	<br>
-	Anonymous:
-	<input type="checkbox" class="fbstats-bool" data-setting="Settings.anonymous" data-redrawThreads>
-	<br>
-	Display other messages:
-	<input type="checkbox" class="fbstats-bool" data-setting="Settings.displayOtherMessages">
-	<br>
-	Scale: <select id="scaleselect"></select>
-	<br>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.stackThreads">Stack Threads
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.stackInOut">Stack Incoming/Outgoing
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.steps">Steps
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.separateInOut">Separate incoming and outgoing
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.anonymous" data-redrawThreads>Anonymous
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.displayOtherMessages">Display other messages
+	</label></div>
+	<div class="select"><label>
+	    <select id="scaleselect"></select>Scale
+	</label></div>
 	Grouping:
 	<select id="groupingselect">
 		<option>daily</option><option selected>weekly</option><option>monthly</option>
@@ -115,7 +118,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	<button onclick="Statistics.exportToCSV()">
 		download data as CSV
 	</button>
-	<button onclick="Statistics.lastUpdate=0;Statistics.save();document.location.reload();">
+	<button onclick="localStorage.clear();Statistics.save=null;saveSettings=null;document.location.reload();">
 		Clear local cache
 	</button>
 	</div>
