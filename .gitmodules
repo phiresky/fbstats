@@ -1,3 +1,4 @@
 [submodule "dev"]
 	path = dev
 	url = git://github.com/phiresky/fbstats.git
+	branch = dev
