@@ -2,9 +2,14 @@ fbstats
 =======
 
 facebook messaging statistics.
-(Anonymized) sample output:
+(Anonymized) sample output
+-----
+version 1, stacked, weekly, log scale:
 ![sample](http://i.imgur.com/QuUJ3cc.png)
-
+version 2, in/out separate, weekly, log scale:
+![sample2](http://i.imgur.com/iM5TM7z.png)
+version 2, two people
+![sample2](http://i.imgur.com/yV80qMI.png)
 Usage
 -----
 You can use the version hosted at http://phiresky.github.io/fbstats/
