@@ -305,6 +305,10 @@ $(function() {
     $("#appidinput").val(Settings.appID);
     butt.hide();
     $("#appidform").submit(function() {
+        $(".fbstats-bool").each(function() {
+            this.checked = eval(this.dataset.setting);
+            this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting)>=0;
+        });
         try {
             event.preventDefault();
             init($("#appidinput").val());
@@ -331,9 +335,6 @@ $(function() {
             if (this.dataset.redrawThreads !== undefined) Statistics.graphThreads();
             Statistics.graphMessages();
         }
-    }).each(function() {
-        this.checked = eval(this.dataset.setting);
-        this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting)>0;
     });
 
     $("#groupingselect").change(function() {
