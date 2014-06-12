@@ -12,6 +12,15 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	html, body, .container {
 		height:100%;
 	}
+	.centered.appidform  {
+		position:absolute;
+		margin-top:-180px;
+		margin-left:-205px;
+		top:50%;
+		left:50%;
+		text-align:center;
+		z-index:5;
+	}
 	.centered {
 		position:absolute;
 		margin-top:-100px;
@@ -47,9 +56,9 @@ uses the unified_thread api which is not available to the public since 2012: htt
 </style>
 <div id="debugDiv" style="display:none;border: 1px solid black" >Errors:<br></div>
 <div class="container">
-	<div class="centered">
-		<div class="alert alert-danger errormessage" style="display:none"><span></span><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
-		<form id=appidform class="form-horizontal" role="form">
+    <div class="centered appidform">
+        <form id=appidform class="form-horizontal" role="form">
+		    <h2>Facebook messaging statistics</h2>
 			<a href="https://github.com/tehdog/fbstats/blob/gh-pages/README.md#usage"><h3>View Instructions</h3></a>
 			<a href="https://github.com/tehdog/fbstats/"><h4>Source Code</h4></a>
 			<div class="form-group">
@@ -61,6 +70,10 @@ uses the unified_thread api which is not available to the public since 2012: htt
 				Begin
 			</button>
 		</form>
+	</div>
+	<div class="centered">
+		<div class="alert alert-danger errormessage" style="display:none"><span></span><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
+		
 		<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="loader.gif" alt="loading.."></a>
 	</div>
 	<div id="statistics">
@@ -91,6 +104,9 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	</label></div>
 	<div class="checkbox"><label>
 	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.displayOtherMessages">Display other messages
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.countChars">Count characters instead of messages
 	</label></div>
 	<div class="select"><label>
 	    Scale: <select id="scaleselect"></select>

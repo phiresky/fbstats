@@ -201,7 +201,7 @@ function mapTimestampsToDays(tid:number, messages: Message[]): number[][] {
     for (var i = 0; i < messages.length; i++) {
         var messageDate = new Date(messages[i].timestamp);
         if (messageDate.getTime() < next.getTime()) {
-            days[current.getTime()]+=messages[i].message.length||1;
+            days[current.getTime()] += Settings.countChars?messages[i].message.length||1:1;
         } else {
             current = new Date(next.getTime());
             //TODO: new Date not needed just use timestamp
@@ -324,7 +324,7 @@ $(function() {
 
     $(".fbstats-bool").on("change", function() {
         var setting = this.dataset.setting;
-        if (eval(setting) === undefined) throw new Error("unknown setting " + setting);
+        if (eval(setting) === undefined && eval("Default"+setting)===undefined) throw new Error("unknown setting " + setting);
         eval(setting + '=' + this.checked);
         if (this.dataset.norefresh === undefined) {
             if (this.dataset.redrawThreads !== undefined) Statistics.graphThreads();

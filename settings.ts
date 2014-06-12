@@ -10,6 +10,7 @@ var DefaultSettings = {
     cacheTime: 60 * 60 * 24,
     maxThreadCount: 20,
     downloadMessageBodies: false,
+    countChars:false,
 
     Graph: {
         smoothAmount: 0,

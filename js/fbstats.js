@@ -218,7 +218,7 @@ function mapTimestampsToDays(tid, messages) {
     for (var i = 0; i < messages.length; i++) {
         var messageDate = new Date(messages[i].timestamp);
         if (messageDate.getTime() < next.getTime()) {
-            days[current.getTime()] += messages[i].message.length || 1;
+            days[current.getTime()] += Settings.countChars ? messages[i].message.length || 1 : 1;
         } else {
             current = new Date(next.getTime());
 
@@ -347,7 +347,7 @@ $(function () {
 
     $(".fbstats-bool").on("change", function () {
         var setting = this.dataset.setting;
-        if (eval(setting) === undefined)
+        if (eval(setting) === undefined && eval("Default" + setting) === undefined)
             throw new Error("unknown setting " + setting);
         eval(setting + '=' + this.checked);
         if (this.dataset.norefresh === undefined) {
@@ -699,6 +699,7 @@ var DefaultSettings = {
     cacheTime: 60 * 60 * 24,
     maxThreadCount: 20,
     downloadMessageBodies: false,
+    countChars: false,
     Graph: {
         smoothAmount: 0,
         separateInOut: true,
