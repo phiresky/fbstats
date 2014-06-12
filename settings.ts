@@ -24,6 +24,7 @@ var DefaultSettings = {
     }
 }
 var Settings = DefaultSettings;
+var SettingNeedsDownloadMessages = ["Settings.countChars"];
 
 function loadSettings() {
     Settings = storageGetObject("settings") || DefaultSettings;

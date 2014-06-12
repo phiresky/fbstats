@@ -136,6 +136,7 @@ function start() {
 * @param {string} appid
 */
 function init(appid) {
+    Settings.appID = appid;
     var butt = $("#loginbutton");
     var txt = $("#logintext");
     var img = butt.children("img");
@@ -324,6 +325,7 @@ $(function () {
     var butt = $("#loginbutton");
     var txt = $("#logintext");
     var img = butt.children("img");
+    $("#appidinput").val(Settings.appID);
     butt.hide();
     $("#appidform").submit(function () {
         try  {
@@ -357,6 +359,7 @@ $(function () {
         }
     }).each(function () {
         this.checked = eval(this.dataset.setting);
+        this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting) > 0;
     });
 
     $("#groupingselect").change(function () {
@@ -712,6 +715,7 @@ var DefaultSettings = {
     }
 };
 var Settings = DefaultSettings;
+var SettingNeedsDownloadMessages = ["Settings.countChars"];
 
 function loadSettings() {
     Settings = storageGetObject("settings") || DefaultSettings;

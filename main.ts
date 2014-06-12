@@ -117,7 +117,7 @@ function start() {
  * @param {string} appid
  */
 function init(appid: string) {
-
+    Settings.appID=appid;
     var butt = $("#loginbutton");
     var txt = $("#logintext");
     var img = butt.children("img");
@@ -302,6 +302,7 @@ $(function() {
     var butt = $("#loginbutton");
     var txt = $("#logintext");
     var img = butt.children("img");
+    $("#appidinput").val(Settings.appID);
     butt.hide();
     $("#appidform").submit(function() {
         try {
@@ -331,8 +332,9 @@ $(function() {
             Statistics.graphMessages();
         }
     }).each(function() {
-            this.checked = eval(this.dataset.setting);
-        });
+        this.checked = eval(this.dataset.setting);
+        this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting)>0;
+    });
 
     $("#groupingselect").change(function() {
         Settings.Graph.grouping = +TimeGrouping[this.value];
