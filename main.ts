@@ -12,6 +12,7 @@ enum TimeGrouping {
 
 var visibleGraphs: number[] = [];
 var plotcolors = ["#942727", "#5DA5DA", "#FAA43A", "#60BD68", "#F17CB0", "#B2912F", "#B276B2", "#DECF3F", "#F15854", "#4D4D4D"];
+var BUSY=false;
 function getColor(tid: number, isIn: boolean) {
     var color: string;
     if (tid == -1) color = otherColor;
@@ -200,7 +201,7 @@ function mapTimestampsToDays(tid:number, messages: Message[]): number[][] {
     for (var i = 0; i < messages.length; i++) {
         var messageDate = new Date(messages[i].timestamp);
         if (messageDate.getTime() < next.getTime()) {
-            days[current.getTime()]++;
+            days[current.getTime()]+=messages[i].message.length||1;
         } else {
             current = new Date(next.getTime());
             //TODO: new Date not needed just use timestamp

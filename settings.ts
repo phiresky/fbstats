@@ -2,6 +2,7 @@ var DefaultSettings = {
     ignoreBelowMessageCount: 20,
     displayOtherMessages: true,
     anonymous: false,
+    appID:"",
     AJAX: {
         threadGetLimit: 100,
         messageGetLimit: 502

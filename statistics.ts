@@ -123,7 +123,6 @@ class Statistics {
             what += ",body,attachment_map";
         var query = "select " + what + " from unified_message where thread_id='" + thread.id + "' LIMIT " + Settings.AJAX.messageGetLimit + " OFFSET  " + offset;
         FBfql(query, function(response) {
-            console.log(response);
             if (!$.isArray(response)) {
                 //error
                 $("#msgload").text("Error " + response.error_code + ": " + response.error_msg);
@@ -138,8 +137,9 @@ class Statistics {
             }
             $("#msgload").text("Downloading " + (Settings.downloadMessageBodies ? "message" : "timestamp") + " " + thread.messages.length + " / " + thread.count + " from thread " + tid + " (" + threadName(tid, thread, 20) + ")");
             if (response.length == 0) {
-                thread.messages.sort();
+                thread.messages.sort((a,b)=>a.timestamp-b.timestamp);
                 Statistics.lastUpdate = Date.now();
+                BUSY=false;
                 Statistics.graphMessages();
             } else {
                 Statistics.messageTimestamps(tid, offset + response.length);
@@ -147,6 +147,8 @@ class Statistics {
         });
     }
     static graphMessages() {
+        if(BUSY) {$(".errormessage").fadeIn().delay(1000).fadeOut();$(".errormessage>span").text("Busy."); return;}
+        BUSY=true;
         if (visibleGraphs.length > 0)
             $("#rswait").hide();
         var mapped: { label: string; data: number[][] }[] = [];
@@ -179,9 +181,7 @@ class Statistics {
             }
         }
         if (Settings.displayOtherMessages) {
-            otherMessages.sort(function(a, b) {
-                return a.timestamp - b.timestamp;
-            });
+            otherMessages.sort((a, b)=> a.timestamp - b.timestamp);
             if (otherMessages.length > 0) {
                 addSeries(visibleGraphs.length > 0 ? "Other" : "All", -1, otherMessages, mapped);
             }
@@ -237,6 +237,7 @@ class Statistics {
             },
             colors: plotcolors
         });
+        BUSY=false;
     }
     static exportToCSV() {
         var s = "Thread,From,Date,Message,Attachments\n";

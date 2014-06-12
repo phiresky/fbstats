@@ -48,7 +48,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 <div id="debugDiv" style="display:none;border: 1px solid black" >Errors:<br></div>
 <div class="container">
 	<div class="centered">
-		<div class="alert alert-danger errormessage" style="display:none"><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
+		<div class="alert alert-danger errormessage" style="display:none"><span></span><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
 		<form id=appidform class="form-horizontal" role="form">
 			<a href="https://github.com/tehdog/fbstats/blob/gh-pages/README.md#usage"><h3>View Instructions</h3></a>
 			<a href="https://github.com/tehdog/fbstats/"><h4>Source Code</h4></a>
@@ -93,7 +93,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.displayOtherMessages">Display other messages
 	</label></div>
 	<div class="select"><label>
-	    <select id="scaleselect"></select>Scale
+	    Scale: <select id="scaleselect"></select>
 	</label></div>
 	Grouping:
 	<select id="groupingselect">

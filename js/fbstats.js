@@ -15,6 +15,7 @@ var TimeGrouping;
 
 var visibleGraphs = [];
 var plotcolors = ["#942727", "#5DA5DA", "#FAA43A", "#60BD68", "#F17CB0", "#B2912F", "#B276B2", "#DECF3F", "#F15854", "#4D4D4D"];
+var BUSY = false;
 function getColor(tid, isIn) {
     var color;
     if (tid == -1)
@@ -217,7 +218,7 @@ function mapTimestampsToDays(tid, messages) {
     for (var i = 0; i < messages.length; i++) {
         var messageDate = new Date(messages[i].timestamp);
         if (messageDate.getTime() < next.getTime()) {
-            days[current.getTime()]++;
+            days[current.getTime()] += messages[i].message.length || 1;
         } else {
             current = new Date(next.getTime());
 
@@ -536,7 +537,6 @@ var Statistics = (function () {
             what += ",body,attachment_map";
         var query = "select " + what + " from unified_message where thread_id='" + thread.id + "' LIMIT " + Settings.AJAX.messageGetLimit + " OFFSET  " + offset;
         FBfql(query, function (response) {
-            console.log(response);
             if (!$.isArray(response)) {
                 //error
                 $("#msgload").text("Error " + response.error_code + ": " + response.error_msg);
@@ -551,8 +551,11 @@ var Statistics = (function () {
             }
             $("#msgload").text("Downloading " + (Settings.downloadMessageBodies ? "message" : "timestamp") + " " + thread.messages.length + " / " + thread.count + " from thread " + tid + " (" + threadName(tid, thread, 20) + ")");
             if (response.length == 0) {
-                thread.messages.sort();
+                thread.messages.sort(function (a, b) {
+                    return a.timestamp - b.timestamp;
+                });
                 Statistics.lastUpdate = Date.now();
+                BUSY = false;
                 Statistics.graphMessages();
             } else {
                 Statistics.messageTimestamps(tid, offset + response.length);
@@ -560,6 +563,12 @@ var Statistics = (function () {
         });
     };
     Statistics.graphMessages = function () {
+        if (BUSY) {
+            $(".errormessage").fadeIn().delay(1000).fadeOut();
+            $(".errormessage>span").text("Busy.");
+            return;
+        }
+        BUSY = true;
         if (visibleGraphs.length > 0)
             $("#rswait").hide();
         var mapped = [];
@@ -654,6 +663,7 @@ var Statistics = (function () {
             },
             colors: plotcolors
         });
+        BUSY = false;
     };
     Statistics.exportToCSV = function () {
         var s = "Thread,From,Date,Message,Attachments\n";
@@ -681,6 +691,7 @@ var DefaultSettings = {
     ignoreBelowMessageCount: 20,
     displayOtherMessages: true,
     anonymous: false,
+    appID: "",
     AJAX: {
         threadGetLimit: 100,
         messageGetLimit: 502
