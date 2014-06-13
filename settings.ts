@@ -9,7 +9,7 @@ var DefaultSettings = {
     },
     cacheTime: 60 * 60 * 24,
     maxThreadCount: 20,
-    downloadMessageBodies: false,
+    downloadMessageBodies: true,
     countChars:false,
 
     Graph: {
