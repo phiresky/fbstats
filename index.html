@@ -12,9 +12,18 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	html, body, .container {
 		height:100%;
 	}
+	.centered.appidform  {
+		position:absolute;
+		margin-top:-180px;
+		margin-left:-205px;
+		top:50%;
+		left:50%;
+		text-align:center;
+		z-index:5;
+	}
 	.centered {
 		position:absolute;
-		margin-top:-50px;
+		margin-top:-100px;
 		margin-left:-150px;
 		top:50%;
 		left:50%;
@@ -31,7 +40,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 		position:relative;
 		display:inline-block;vertical-ali
 		}
-		#threadcount,#threadtime {
+	#threadcount,#threadtime {
 		width:100%;
 		height:100%;
 		position:relative;
@@ -45,21 +54,26 @@ uses the unified_thread api which is not available to the public since 2012: htt
 		position:fixed; top:20%; left:50%; margin-left:-150px; width:300px;z-index:999;
 	}
 </style>
-<div id="debugDiv" style="display:none;border: 1px solid black" ></div>
+<div id="debugDiv" style="display:none;border: 1px solid black" >Errors:<br></div>
 <div class="container">
-	<div class="centered">
-		<div class="alert alert-danger errormessage" style="display:none"><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
-		<form id=appidform class="form-horizontal" role="form">
+    <div class="centered appidform">
+        <form id=appidform class="form-horizontal" role="form">
+		    <h2>Facebook messaging statistics</h2>
 			<a href="https://github.com/tehdog/fbstats/blob/gh-pages/README.md#usage"><h3>View Instructions</h3></a>
 			<a href="https://github.com/tehdog/fbstats/"><h4>Source Code</h4></a>
 			<div class="form-group">
 				<label for="appidinput">Your App ID</label>
 				<input type="text" class="form-control" id="appidinput" placeholder="App ID">
 			</div>
+			<p></p><input type=checkbox class="fbstats-bool" data-setting="Settings.downloadMessageBodies" data-norefresh> Download message contents</p>
 			<button type="submit" class="btn btn-default">
 				Begin
 			</button>
 		</form>
+	</div>
+	<div class="centered">
+		<div class="alert alert-danger errormessage" style="display:none"><span></span><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
+		
 		<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="loader.gif" alt="loading.."></a>
 	</div>
 	<div id="statistics">
@@ -70,23 +84,33 @@ uses the unified_thread api which is not available to the public since 2012: htt
 			<div id="threadtime"></div>
 		</div>
 	</div>
+	<div id="settings" style="display:none;">
 	Smoothness: <span id=smth>0</span></label>
-	<input id="smoothSlide" type="range" min=0 max=20 value=1 onchange="smooth=smth.innerText=this.value;Statistics.graphMessages()">
-	<br>
-	Stacked:
-	<input type="checkbox" checked onclick="stacked=this.checked;Statistics.graphMessages()">
-	<br>
-	Steps:
-	<input type="checkbox" checked onclick="steps=this.checked;Statistics.graphMessages()">
-	<br>
-	Anonymous:
-	<input type="checkbox" onclick="anonymous=this.checked;Statistics.graphThreads();Statistics.graphMessages()">
-	<br>
-	Display other messages:
-	<input type="checkbox" checked onclick="other=this.checked;Statistics.graphThreads();Statistics.graphMessages()">
-	<br>
-	Scale: <select id="scaleselect"></select>
-	<br>
+	<input id="smoothSlide" type="range" min=0 max=20 value=1 onchange="Settings.Graph.smoothAmount=smth.innerText=this.value;Statistics.graphMessages()">
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.stackThreads">Stack Threads
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.stackInOut">Stack Incoming/Outgoing
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.steps">Steps
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.Graph.separateInOut">Separate incoming and outgoing
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.anonymous" data-redrawThreads>Anonymous
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.displayOtherMessages">Display other messages
+	</label></div>
+	<div class="checkbox"><label>
+	    <input type="checkbox" class="fbstats-bool" data-setting="Settings.countChars">Count characters instead of messages
+	</label></div>
+	<div class="select"><label>
+	    Scale: <select id="scaleselect"></select>
+	</label></div>
 	Grouping:
 	<select id="groupingselect">
 		<option>daily</option><option selected>weekly</option><option>monthly</option>
@@ -95,18 +119,25 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	Thread display count:
 	<input id="threadcountinput" type=number min=5 max=30 value=15 step=1>
 	<br>
+	<button onclick="getAll()">
+		Download/Display all threads
+	</button>
+	<button onclick="getAll(0,0)">
+		Show total only
+	</button>
 	<button onclick="getAllVisible()">
-		get all visible threads
+		Download/Display all visible threads
 	</button>
 	<button onclick="getAllInvisible()">
-		get all invisible threads
+		Download/Display all "Other" threads
 	</button>
 	<button onclick="Statistics.exportToCSV()">
-		export timestamps to CSV
+		download data as CSV
 	</button>
-	<button onclick="Statistics.lastUpdate=0;Statistics.save();document.location.reload();">
+	<button onclick="localStorage.clear();Statistics.save=null;saveSettings=null;document.location.reload();">
 		Clear local cache
 	</button>
+	</div>
 </div>
 <!--[if lt IE 9 ]>
 <script>
@@ -124,7 +155,9 @@ document.execCommand('Stop');
 <script src="js/jquery.flot.resize.min.js"></script>
 <script src="js/jquery.flot.stack.min.js"></script>
 <script src="js/jquery-ui.custom.min.js"></script>
-<script src="js/fbstats.min.js"></script>
+<script src="js/lz-string-1.3.3-min.js"></script>
+<script src="js/fbstats.js"></script>
+
 <script>
 if(location.search.indexOf("debug")>=0) $("#debugDiv").show();
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
