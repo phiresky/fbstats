@@ -18,7 +18,8 @@ class Statistics {
         if (savedversion !== Statistics.version || !last || (Date.now() - parseInt(last, 10) > 1000 * Settings.cacheTime))
             return false;
         //could not load/cache too old
-        Statistics.threads = storageGetObject("threads");
+        Statistics.threads = storageGetObject("threads")||[];
+		if(!Statistics.threads||Statistics.threads.length==0) return false;
         return true;
     }
     static countThreads(offset: number = 0) {

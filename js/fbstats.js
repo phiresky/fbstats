@@ -436,7 +436,9 @@ var Statistics = (function () {
             return false;
 
         //could not load/cache too old
-        Statistics.threads = storageGetObject("threads");
+        Statistics.threads = storageGetObject("threads") || [];
+        if (!Statistics.threads || Statistics.threads.length == 0)
+            return false;
         return true;
     };
     Statistics.countThreads = function (offset) {
