@@ -335,7 +335,11 @@ $(function() {
             if (this.dataset.redrawThreads !== undefined) Statistics.graphThreads();
             Statistics.graphMessages();
         }
-    });
+    }).each(function() {
+		this.checked = eval(this.dataset.setting);
+		this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting)>=0;
+	});
+
 
     $("#groupingselect").change(function() {
         Settings.Graph.grouping = +TimeGrouping[this.value];

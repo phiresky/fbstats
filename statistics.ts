@@ -6,6 +6,7 @@ class Statistics {
     static messagePlot: jquery.flot.plot;
     static version = "2";
     static save() {
+		console.info("saving to localStorage");
         localStorage.setItem("lastUpdate", "" + Statistics.lastUpdate);
         localStorage.setItem("fbstatsversion", Statistics.version);
         if (Statistics.lastUpdate == 0)
@@ -17,6 +18,7 @@ class Statistics {
         var savedversion = localStorage.getItem("fbstatsversion");
         if (savedversion !== Statistics.version || !last || (Date.now() - parseInt(last, 10) > 1000 * Settings.cacheTime))
             return false;
+		console.info("loading from localStorage");
         //could not load/cache too old
         Statistics.threads = storageGetObject("threads")||[];
 		if(!Statistics.threads||Statistics.threads.length==0) return false;
@@ -140,6 +142,7 @@ class Statistics {
             if (response.length == 0) {
                 thread.messages.sort((a,b)=>a.timestamp-b.timestamp);
                 Statistics.lastUpdate = Date.now();
+				if(thread.messages.length>1000) Statistics.save(); // save if just downloaded lots of messages
                 BUSY=false;
                 Statistics.graphMessages();
             } else {

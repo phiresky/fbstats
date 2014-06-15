@@ -361,6 +361,9 @@ $(function () {
                 Statistics.graphThreads();
             Statistics.graphMessages();
         }
+    }).each(function () {
+        this.checked = eval(this.dataset.setting);
+        this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting) >= 0;
     });
 
     $("#groupingselect").change(function () {
@@ -423,6 +426,7 @@ var Statistics = (function () {
     function Statistics() {
     }
     Statistics.save = function () {
+        console.info("saving to localStorage");
         localStorage.setItem("lastUpdate", "" + Statistics.lastUpdate);
         localStorage.setItem("fbstatsversion", Statistics.version);
         if (Statistics.lastUpdate == 0)
@@ -434,6 +438,7 @@ var Statistics = (function () {
         var savedversion = localStorage.getItem("fbstatsversion");
         if (savedversion !== Statistics.version || !last || (Date.now() - parseInt(last, 10) > 1000 * Settings.cacheTime))
             return false;
+        console.info("loading from localStorage");
 
         //could not load/cache too old
         Statistics.threads = storageGetObject("threads") || [];
@@ -561,6 +566,8 @@ var Statistics = (function () {
                     return a.timestamp - b.timestamp;
                 });
                 Statistics.lastUpdate = Date.now();
+                if (thread.messages.length > 1000)
+                    Statistics.save(); // save if just downloaded lots of messages
                 BUSY = false;
                 Statistics.graphMessages();
             } else {
