@@ -15,7 +15,7 @@ Usage
 You can use the version hosted at http://phiresky.github.io/fbstats/
 As the API from facebook is still in beta, you will need to be facebook developer and create an "app" for this to work.
 
-**As of April 30. 2014 this is no longer supported by facebook due to new restrictions in the api. Apps created after that date might not work**
+**As of April 30. 2014 facebook added new restrictions to their api. The parts I use are now deprecated, facebook might remove the endpoint in the future.**
 
 ### Detailed App creation instructions
 
