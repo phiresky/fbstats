@@ -36,9 +36,9 @@ The already downloaded message timestamps (Statistics.threads) will be stored lo
 
 ### Todo
 I'm not implying I will actually do these, but well 
-* Restructure code. It's a mess, you can't even find the entry point.
+* ~~Restructure code. It's a mess, you can't even find the entry point.~~ It is now [TypeScript](http://typescriptlang.org) and in multiple files.
 * Support time range selection and zooming [like this](http://www.pureexample.com/jquery-flot/zooming-chart.html)
-* Rewrite "Other" calculation
+* ~~Rewrite "Other" calculation~~ Should be better
 * Support import of messages.html from facebook data download
-* Support downloading messages themselves for viewing excerpts and extended analysis
+* ~~Support downloading messages themselves for viewing excerpts and extended analysis~~ Works now, complete data is downloadable as CSV.
 * ...
