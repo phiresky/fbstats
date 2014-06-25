@@ -59,7 +59,6 @@ function toRGBA(hex: number[], a: number = 1) {
 
 /**
  * sets all threads as active and gets them
- * @param {number} max
  */
 function getAll(max: number = Statistics.threads.length, min: number = 0) {
     if (max===null)
@@ -118,6 +117,9 @@ function start() {
  */
 function init(appid: string) {
     Settings.appID=appid;
+	if(!FB.getLoginStatus) {
+		throw new Error("Facebook API could not be accessed. Make sure Ghostery or similar allows 'Facebook Connect' and 'Facebook Social Graph'.");
+	}
     var butt = $("#loginbutton");
     var txt = $("#logintext");
     var img = butt.children("img");
