@@ -596,9 +596,9 @@ var Statistics = (function () {
             else
                 Statistics.threadPlot.unhighlight(0, t);
             var thread = Statistics.threads[t];
-            if (shown && (!thread.messages || thread.messages.length == 0 || thread.messages.length !== thread.count)) {
+            if (shown && (!thread.messages || thread.messages.length == 0 || thread.messages.length < thread.count)) {
                 if (thread.messages.length > 0) {
-                    console.log("warn: messages for thread " + t + " incomplete, resetting..");
+                    console.log("warn: messages for thread " + t + " incomplete. Got " + thread.messages.length + " messages, expected " + thread.count + ", resetting..");
                     thread.messages = [];
                 }
                 console.log("Downloading thread " + t);
