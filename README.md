@@ -1,7 +1,7 @@
 fbstats
 =======
 
-facebook messaging statistics.
+facebook messaging statistics. See screenshots below for sample output. Also supports downloading your entire messaging history as [CSV](https://en.wikipedia.org/wiki/Comma-separated_values).
 (Anonymized) sample output
 -----
 version 1, stacked, weekly, log scale:
