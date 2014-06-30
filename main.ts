@@ -306,7 +306,7 @@ $(function() {
     var img = butt.children("img");
     $("#appidinput").val(Settings.appID);
     butt.hide();
-    $("#appidform").submit(function() {
+    $("#appidform").submit(function(event) {
         $(".fbstats-bool").each(function() {
             this.checked = eval(this.dataset.setting);
             this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting)>=0;
