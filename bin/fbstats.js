@@ -115,7 +115,7 @@ function start() {
         var loaded = Statistics.load();
         $("<a/>", {
             "class": "btn btn-lg btn-primary centered",
-            html: "<span id=threadload>Gathering statistics</span> <img src=loader.gif alt=\"loading..\">"
+            html: "<span id=threadload>Gathering statistics</span> <img src=lib/loader.gif alt=\"loading..\">"
         }).appendTo("#threadcount");
         $("<a/>", {
             class: "btn btn-lg btn-primary centered",
@@ -605,7 +605,7 @@ var Statistics = (function () {
                 if ($("#msgload").length == 0) {
                     $("<a/>", {
                         class: "btn btn-lg btn-primary centered",
-                        html: "<span id=msgload>Downloading thread</span> <img src=loader.gif>"
+                        html: "<span id=msgload>Downloading thread</span> <img src=lib/loader.gif>"
                     }).appendTo("#threadtime");
                 }
                 Statistics.messageTimestamps(t);
@@ -740,9 +740,9 @@ function saveSettings() {
 * source: https://github.com/phiresky/fbstats
 * to be compiled with closure compiler
 */
-/// <reference path="inc/jquery.d.ts" />
-/// <reference path="inc/fbsdk.d.ts" />
-/// <reference path="inc/jquery.flot.d.ts" />
+/// <reference path="../lib/jquery.d.ts" />
+/// <reference path="../lib/fbsdk.d.ts" />
+/// <reference path="../lib/jquery.flot.d.ts" />
 /// <reference path="main.ts" />
 /// <reference path="classes.ts" />
 /// <reference path="statistics.ts" />

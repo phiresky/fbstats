@@ -172,7 +172,7 @@ class Statistics {
                 if ($("#msgload").length == 0) {
                     $("<a/>", {
                         class: "btn btn-lg btn-primary centered",
-                        html: "<span id=msgload>Downloading thread</span> <img src=loader.gif>"
+                        html: "<span id=msgload>Downloading thread</span> <img src=lib/loader.gif>"
                     }).appendTo("#threadtime");
                 }
                 Statistics.messageTimestamps(t);

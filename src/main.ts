@@ -96,7 +96,7 @@ function start() {
         var loaded = Statistics.load();
         $("<a/>", {
             "class": "btn btn-lg btn-primary centered",
-            html: "<span id=threadload>Gathering statistics</span> <img src=loader.gif alt=\"loading..\">",
+            html: "<span id=threadload>Gathering statistics</span> <img src=lib/loader.gif alt=\"loading..\">",
         }).appendTo("#threadcount");
         $("<a/>", {
             class: "btn btn-lg btn-primary centered",

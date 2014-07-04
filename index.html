@@ -6,8 +6,8 @@ uses the unified_thread api which is not available to the public since 2012: htt
 -->
 <meta charset='utf-8'>
 <title>Facebook Messaging Statistics</title>
-<link href="css/bootstrap.min.css" rel="stylesheet">
-<link href="css/jquery-ui.custom.min.css" rel="stylesheet">
+<link href="lib/bootstrap.min.css" rel="stylesheet">
+<link href="lib/jquery-ui.custom.min.css" rel="stylesheet">
 <style>
 	html, body, .container {
 		height:100%;
@@ -74,7 +74,7 @@ uses the unified_thread api which is not available to the public since 2012: htt
 	<div class="centered">
 		<div class="alert alert-danger errormessage" style="display:none"><span></span><button type=button class=close onclick="$(this).parent().fadeOut()">&times;</button></div>
 		
-		<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="loader.gif" alt="loading.."></a>
+		<a id="loginbutton" class="btn btn-primary btn-lg"><span id="logintext">JavaScript not enabled</span> <img src="lib/loader.gif" alt="loading.."></a>
 	</div>
 	<div id="statistics">
 		<div class=plotcontainer>
@@ -146,17 +146,17 @@ document.getElementById("loginbutton").onclick=function(){document.location.href
 document.execCommand('Stop');
 </script>
 <![endif]-->
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
+<script src="lib/jquery.min.js"></script>
+<script src="lib/bootstrap.min.js"></script>
 <script src="//connect.facebook.net/en_US/all.js"></script>
-<script src="js/jquery.flot.min.js"></script>
-<script src="js/jquery.flot.categories.min.js"></script>
-<script src="js/jquery.flot.time.min.js"></script>
-<script src="js/jquery.flot.resize.min.js"></script>
-<script src="js/jquery.flot.stack.min.js"></script>
-<script src="js/jquery-ui.custom.min.js"></script>
-<script src="js/lz-string-1.3.3-min.js"></script>
-<script src="js/fbstats.js"></script>
+<script src="lib/jquery.flot.min.js"></script>
+<script src="lib/jquery.flot.categories.min.js"></script>
+<script src="lib/jquery.flot.time.min.js"></script>
+<script src="lib/jquery.flot.resize.min.js"></script>
+<script src="lib/jquery.flot.stack.min.js"></script>
+<script src="lib/jquery-ui.custom.min.js"></script>
+<script src="lib/lz-string-1.3.3-min.js"></script>
+<script src="bin/fbstats.js"></script>
 
 <script>
 if(location.search.indexOf("debug")>=0) $("#debugDiv").show();
