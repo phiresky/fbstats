@@ -13,9 +13,11 @@ version 2, two people
 Usage
 -----
 You can use the version hosted at http://phiresky.github.io/fbstats/
-As the API from facebook is still in beta, you will need to be facebook developer and create an "app" for this to work.
+As the API from facebook is in beta, you will need to be facebook developer and create an "app" for this to work.
 
 **As of [2014-04-30 facebook added](https://developers.facebook.com/blog/post/2014/04/30/the-new-facebook-login/) [new restrictions](https://developers.facebook.com/docs/apps/changelog) to their api. The parts I use are now deprecated, facebook might remove the endpoint in the future.**
+
+**As of 2014-08-07 [(v2.1)](https://developers.facebook.com/blog/post/2014/08/07/Graph-API-v2.1/) facebook removed the ability to access the FQL message endpoint. Apps created after that date will not work. The new method of accessing the data is far too slow for this purpose. (see [issue 6](https://github.com/phiresky/fbstats/issues/6))**
 
 ### Detailed App creation instructions
 
