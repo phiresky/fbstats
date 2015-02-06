@@ -152,15 +152,15 @@ function init(appid: string) {
 
 function checkPerms(): void {
     FB.api("/me/permissions", "get", function(e: any) {
-        if (e.data[0].permission === "installed") {// fb api v2.0 
-            for (var i = 0; i < e.data.length; i++) {
-                if (e.data[i].permission === "read_mailbox" && e.data[i].status === "granted") {
-                    start();
-                    return;
-                }
-            }
-        }
-        if (!e.data[0].read_mailbox) {
+		var success = false;
+		try {
+			success = 
+		// fb api v1.0:
+			e.data.some((x:any) => x.read_mailbox)
+		// fb api v2.0, v2.1
+			|| e.data.some((x:any) => x.permission === "read_mailbox" && x.status === "granted");
+		} catch(e) {console.log(e);};
+        if (!success) {
             console.log(e.data);
             $("#logintext").text("Could not access message data");
             $("#loginbutton>img").hide();

@@ -1,10 +1,9 @@
 /**
-* source: https://github.com/phiresky/fbstats
-*/
+ * source: https://github.com/phiresky/fbstats
+ */
 var user = {
     userID: "unknown"
 };
-
 var TimeGrouping;
 (function (TimeGrouping) {
     TimeGrouping[TimeGrouping["daily"] = 0] = "daily";
@@ -12,7 +11,6 @@ var TimeGrouping;
     TimeGrouping[TimeGrouping["monthly"] = 2] = "monthly";
     TimeGrouping[TimeGrouping["END"] = 3] = "END";
 })(TimeGrouping || (TimeGrouping = {}));
-
 var visibleGraphs = [];
 var plotcolors = ["#942727", "#5DA5DA", "#FAA43A", "#60BD68", "#F17CB0", "#B2912F", "#B276B2", "#DECF3F", "#F15854", "#4D4D4D"];
 var BUSY = false;
@@ -28,25 +26,16 @@ var otherColor = "#999999";
 var scales = {
     "linear": {},
     "sqrt": {
-        inversetransform: function (v) {
-            return v * v;
-        },
-        transform: function (v) {
-            return Math.sqrt(v);
-        }
+        inversetransform: function (v) { return v * v; },
+        transform: function (v) { return Math.sqrt(v); }
     },
     "log": {
-        inversetransform: function (v) {
-            return Math.exp(v) - 1;
-        },
-        transform: function (v) {
-            return Math.log(v + 1);
-        }
+        inversetransform: function (v) { return Math.exp(v) - 1; },
+        transform: function (v) { return Math.log(v + 1); }
     }
 };
-
 function threadName(t, thread, maxlength) {
-    if (typeof maxlength === "undefined") { maxlength = 10000; }
+    if (maxlength === void 0) { maxlength = 10000; }
     if (t == -1)
         return "Other";
     if (Settings.anonymous)
@@ -58,7 +47,6 @@ function threadName(t, thread, maxlength) {
         return str.substring(0, maxlength - 1) + "…";
     return str;
 }
-
 function hexToRGB(hex, multiply) {
     var hexInt = parseInt(hex.substring(1), 16);
     var r = hexInt >> 16;
@@ -66,20 +54,16 @@ function hexToRGB(hex, multiply) {
     var b = hexInt & 0xFF;
     return [r * multiply, g * multiply, b * multiply];
 }
-
 function toRGBA(hex, a) {
-    if (typeof a === "undefined") { a = 1; }
-    return "rgba(" + hex.map(function (x) {
-        return (x | 0);
-    }).join(",") + "," + a + ")";
+    if (a === void 0) { a = 1; }
+    return "rgba(" + hex.map(function (x) { return (x | 0); }).join(",") + "," + a + ")";
 }
-
 /**
-* sets all threads as active and gets them
-*/
+ * sets all threads as active and gets them
+ */
 function getAll(max, min) {
-    if (typeof max === "undefined") { max = Statistics.threads.length; }
-    if (typeof min === "undefined") { min = 0; }
+    if (max === void 0) { max = Statistics.threads.length; }
+    if (min === void 0) { min = 0; }
     if (max === null)
         max = Statistics.threads.length;
     visibleGraphs = [];
@@ -87,28 +71,25 @@ function getAll(max, min) {
         visibleGraphs.push(i);
     Statistics.graphMessages();
 }
-
 function getAllVisible() {
     getAll(Settings.maxThreadCount);
 }
-
 function getAllInvisible() {
     getAll(null, Settings.maxThreadCount);
 }
-
 function login() {
     FB.login(function (response) {
         if (response.authResponse) {
             user = response.authResponse;
             checkPerms();
-        } else {
+        }
+        else {
             document.location.reload();
         }
     }, {
         scope: 'read_mailbox'
     });
 }
-
 function start() {
     $("#logintext").text("Loading local cache");
     setTimeout(function () {
@@ -124,16 +105,16 @@ function start() {
         }).appendTo("#threadtime");
         if (loaded) {
             Statistics.graphThreads();
-        } else {
+        }
+        else {
             Statistics.countThreads();
         }
         $("#loginbutton").fadeOut();
     }, 500);
 }
-
 /**
-* @param {string} appid
-*/
+ * @param {string} appid
+ */
 function init(appid) {
     Settings.appID = appid;
     if (!FB.getLoginStatus) {
@@ -168,27 +149,26 @@ function init(appid) {
     $("#threadcount").parent().resizable();
     $("#threadtime").parent().resizable();
 }
-
 function checkPerms() {
     FB.api("/me/permissions", "get", function (e) {
-        if (e.data[0].permission === "installed") {
-            for (var i = 0; i < e.data.length; i++) {
-                if (e.data[i].permission === "read_mailbox" && e.data[i].status === "granted") {
-                    start();
-                    return;
-                }
-            }
+        var success = false;
+        try {
+            success = e.data.some(function (x) { return x.read_mailbox; }) || e.data.some(function (x) { return x.permission === "read_mailbox" && x.status === "granted"; });
         }
-        if (!e.data[0].read_mailbox) {
+        catch (e) {
+            console.log(e);
+        }
+        ;
+        if (!success) {
             console.log(e.data);
             $("#logintext").text("Could not access message data");
             $("#loginbutton>img").hide();
-        } else {
+        }
+        else {
             start();
         }
     });
 }
-
 function log(e) {
     console.groupCollapsed(e.callee.name);
     for (var i in e)
@@ -196,7 +176,6 @@ function log(e) {
     console.trace();
     console.groupEnd();
 }
-
 function mapTimestampsToDays(tid, messages) {
     var days = {};
     if (messages.length == 0) {
@@ -217,14 +196,13 @@ function mapTimestampsToDays(tid, messages) {
             next.setDate(1);
             break;
     }
-
     for (var i = 0; i < messages.length; i++) {
         var messageDate = new Date(messages[i].timestamp);
         if (messageDate.getTime() < next.getTime()) {
             days[current.getTime()] += Settings.countChars ? messages[i].message.length || 1 : 1;
-        } else {
+        }
+        else {
             current = new Date(next.getTime());
-
             //TODO: new Date not needed just use timestamp
             days[current.getTime()] = 0;
             next.addInterval(1);
@@ -249,13 +227,11 @@ function mapTimestampsToDays(tid, messages) {
         days2[a] = (days[a] + days[b]) / 3;
         days = days2;
     }
-
     for (day in days) {
         dayArray.push([day, days[day]]);
     }
     return dayArray;
 }
-
 function FBfql(a, b) {
     log(arguments);
     FB.api({
@@ -263,24 +239,17 @@ function FBfql(a, b) {
         query: a
     }, b);
 }
-
 function storageSetObject(key, value) {
     localStorage.setItem(key, LZString.compressToUTF16(JSON.stringify(value)));
 }
-
 function storageGetObject(key) {
     var value = localStorage.getItem(key);
     return value && JSON.parse(LZString.decompressFromUTF16(value));
 }
-
 function addSeries(label, threadID, messages, mapped) {
     if (Settings.Graph.separateInOut) {
-        var dataIn = mapTimestampsToDays(threadID, messages.filter(function (m) {
-            return m.from.id !== user.userID;
-        }));
-        var dataOut = mapTimestampsToDays(threadID, messages.filter(function (m) {
-            return m.from.id === user.userID;
-        }));
+        var dataIn = mapTimestampsToDays(threadID, messages.filter(function (m) { return m.from.id !== user.userID; }));
+        var dataOut = mapTimestampsToDays(threadID, messages.filter(function (m) { return m.from.id === user.userID; }));
         if (dataIn !== null)
             mapped.push({
                 label: label + "|In",
@@ -295,7 +264,8 @@ function addSeries(label, threadID, messages, mapped) {
                 color: getColor(threadID, false),
                 data: dataOut
             });
-    } else {
+    }
+    else {
         mapped.push({
             label: label,
             stack: Settings.Graph.stackThreads ? "true" : null,
@@ -304,7 +274,6 @@ function addSeries(label, threadID, messages, mapped) {
         });
     }
 }
-
 Date.prototype.getWeek = function () {
     var onejan = new Date(this.getFullYear(), 0, 1);
     return Math.ceil((((this.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
@@ -334,12 +303,13 @@ $(function () {
             this.checked = eval(this.dataset.setting);
             this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting) >= 0;
         });
-        try  {
+        try {
             event.preventDefault();
             init($("#appidinput").val());
             $("#settings").show();
             $(this).hide();
-        } catch (e) {
+        }
+        catch (e) {
             $(".errormessage").append(e).fadeIn();
             throw e;
         }
@@ -352,7 +322,6 @@ $(function () {
     for (var s in scales) {
         $("<option/>").text(s).appendTo(scaleselect);
     }
-
     $(".fbstats-bool").on("change", function () {
         var setting = this.dataset.setting;
         if (eval(setting) === undefined && eval("Default" + setting) === undefined)
@@ -367,13 +336,11 @@ $(function () {
         this.checked = eval(this.dataset.setting);
         this.disabled = !Settings.downloadMessageBodies && SettingNeedsDownloadMessages.indexOf(this.dataset.setting) >= 0;
     });
-
     $("#groupingselect").change(function () {
         Settings.Graph.grouping = +TimeGrouping[this.value];
         Statistics.graphThreads();
         Statistics.graphMessages();
     });
-
     $("#threadcountinput").change(function () {
         var c = $(this).val() || 15;
         if (c < 3)
@@ -384,7 +351,6 @@ $(function () {
         Settings.maxThreadCount = c;
         Statistics.graphThreads();
     });
-
     $(window).on("beforeunload", function () {
         saveSettings();
         if (Statistics.lastUpdate && Statistics.threads.length > 0)
@@ -441,7 +407,6 @@ var Statistics = (function () {
         if (savedversion !== Statistics.version || !last || (Date.now() - parseInt(last, 10) > 1000 * Settings.cacheTime))
             return false;
         console.info("loading from localStorage");
-
         //could not load/cache too old
         Statistics.threads = storageGetObject("threads") || [];
         if (!Statistics.threads || Statistics.threads.length == 0)
@@ -449,7 +414,7 @@ var Statistics = (function () {
         return true;
     };
     Statistics.countThreads = function (offset) {
-        if (typeof offset === "undefined") { offset = 0; }
+        if (offset === void 0) { offset = 0; }
         var query = "select participants,num_messages,thread_id from unified_thread where folder='inbox' LIMIT " + Settings.AJAX.threadGetLimit + " OFFSET " + offset;
         FBfql(query, function (response) {
             if (!$.isArray(response)) {
@@ -458,7 +423,6 @@ var Statistics = (function () {
                 console.log("Error: ", response);
                 return;
             }
-
             for (var i = 0; i < response.length; i++) {
                 //console.log(response[i]);
                 if (response[i].num_messages < Settings.ignoreBelowMessageCount)
@@ -472,7 +436,8 @@ var Statistics = (function () {
                 });
                 Statistics.lastUpdate = Date.now();
                 Statistics.graphThreads();
-            } else {
+            }
+            else {
                 Statistics.countThreads(offset + response.length);
             }
         });
@@ -487,10 +452,9 @@ var Statistics = (function () {
                 Statistics.reducedThreads.push(Statistics.threads[i]);
         }
         var data = [$.map(Statistics.reducedThreads, function (t, i) {
-                return [[t.count, threadName(i, t)]];
-            })];
+            return [[t.count, threadName(i, t)]];
+        })];
         data[0].push([otherCount, "Other"]);
-
         //window.dat2a=data;
         Statistics.threadPlot = $.plot($("#threadcount"), data, {
             series: {
@@ -536,14 +500,15 @@ var Statistics = (function () {
             var contained = visibleGraphs.indexOf(index);
             if (contained < 0) {
                 visibleGraphs.push(index);
-            } else {
+            }
+            else {
                 visibleGraphs.splice(contained, 1);
             }
             Statistics.graphMessages();
         });
     };
     Statistics.messageTimestamps = function (tid, offset) {
-        if (typeof offset === "undefined") { offset = 0; }
+        if (offset === void 0) { offset = 0; }
         var thread = Statistics.threads[tid];
         var what = "timestamp,sender";
         if (Settings.downloadMessageBodies)
@@ -564,15 +529,14 @@ var Statistics = (function () {
             }
             $("#msgload").text("Downloading " + (Settings.downloadMessageBodies ? "message" : "timestamp") + " " + thread.messages.length + " / " + thread.count + " from thread " + tid + " (" + threadName(tid, thread, 20) + ")");
             if (response.length == 0) {
-                thread.messages.sort(function (a, b) {
-                    return a.timestamp - b.timestamp;
-                });
+                thread.messages.sort(function (a, b) { return a.timestamp - b.timestamp; });
                 Statistics.lastUpdate = Date.now();
                 if (thread.messages.length > 1000)
                     Statistics.save(); // save if just downloaded lots of messages
                 BUSY = false;
                 Statistics.graphMessages();
-            } else {
+            }
+            else {
                 Statistics.messageTimestamps(tid, offset + response.length);
             }
         });
@@ -588,7 +552,6 @@ var Statistics = (function () {
             $("#rswait").hide();
         var mapped = [];
         var otherMessages = [];
-
         for (var t = 0; t < Statistics.threads.length; t++) {
             var shown = visibleGraphs.indexOf(t) != -1;
             if (shown)
@@ -613,19 +576,17 @@ var Statistics = (function () {
             }
             if (shown) {
                 addSeries(threadName(t, thread), t, thread.messages, mapped);
-            } else if (Settings.displayOtherMessages) {
+            }
+            else if (Settings.displayOtherMessages) {
                 otherMessages = otherMessages.concat(thread.messages);
             }
         }
         if (Settings.displayOtherMessages) {
-            otherMessages.sort(function (a, b) {
-                return a.timestamp - b.timestamp;
-            });
+            otherMessages.sort(function (a, b) { return a.timestamp - b.timestamp; });
             if (otherMessages.length > 0) {
                 addSeries(visibleGraphs.length > 0 ? "Other" : "All", -1, otherMessages, mapped);
             }
         }
-
         // add missing data
         var first = 1e100;
         var last = 0;
@@ -650,7 +611,6 @@ var Statistics = (function () {
                 arr.push([date.getTime(), 0]);
             }
         }
-
         Statistics.messagePlot = $.plot($("#threadtime"), mapped, {
             xaxis: {
                 mode: 'time'
@@ -666,12 +626,11 @@ var Statistics = (function () {
                 show: true,
                 lineWidth: 0,
                 fillColor: {
-                    colors: [
-                        {
-                            opacity: (Settings.Graph.stackThreads || Settings.Graph.stackInOut ? 1 : Settings.Graph.unstackedOpacity)
-                        }, {
-                            opacity: (Settings.Graph.stackThreads || Settings.Graph.stackInOut ? 0.99 : Settings.Graph.unstackedOpacity - 0.01)
-                        }]
+                    colors: [{
+                        opacity: (Settings.Graph.stackThreads || Settings.Graph.stackInOut ? 1 : Settings.Graph.unstackedOpacity)
+                    }, {
+                        opacity: (Settings.Graph.stackThreads || Settings.Graph.stackInOut ? 0.99 : Settings.Graph.unstackedOpacity - 0.01)
+                    }]
                 },
                 fill: true,
                 steps: Settings.Graph.steps
@@ -698,7 +657,6 @@ var Statistics = (function () {
     Statistics.lastUpdate = 0;
     Statistics.threads = [];
     Statistics.reducedThreads = [];
-
     Statistics.version = "2";
     return Statistics;
 })();
@@ -728,18 +686,16 @@ var DefaultSettings = {
 };
 var Settings = DefaultSettings;
 var SettingNeedsDownloadMessages = ["Settings.countChars"];
-
 function loadSettings() {
     Settings = storageGetObject("settings") || DefaultSettings;
 }
-
 function saveSettings() {
     storageSetObject("settings", Settings);
 }
 /**
-* source: https://github.com/phiresky/fbstats
-* to be compiled with closure compiler
-*/
+ * source: https://github.com/phiresky/fbstats
+ * to be compiled with closure compiler
+ */
 /// <reference path="../lib/jquery.d.ts" />
 /// <reference path="../lib/fbsdk.d.ts" />
 /// <reference path="../lib/jquery.flot.d.ts" />
